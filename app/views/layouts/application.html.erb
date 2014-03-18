@@ -33,12 +33,38 @@
 
     <%= render_google_universal_analytics_code %>
 
+	<script type="text/javascript">
+        function navigateForum() {
+            window.location.href = "http://forum." + window.location.host;
+        }
+    </script>
+	
     <%= yield :head %>
   </head>
 
   <body>
+
+	<header class="main-header">
+		<img id="logo" src="assets/logo.png" onclick="navigateForum()">
+		<div id="main-menu-wrapper">
+			<ul id="main-menu">
+				<li><a href="" onclick="navigateForum()">Головна</a></li>
+				<li><a href="http://buildukraine.com/advice">Поради</a></li>
+				<li><a href="http://buildukraine.com/">Як це працює?</a></li>
+				<li><a href="http://blog.buildukraine.com/">Блог</a></li>
+				<li><a href="http://buildukraine.com/about">Про нас</a></li>
+			</ul>
+			<ul id="main-menu-social">
+				<a href='https://www.facebook.com/buildukraine'><li id="facebook-page"></li></a>
+				<!-- <li id="vkontakte-page"></li>
+				<li id="twitter-page"></li>
+				<li id="odnoklassniki-page"></li> -->
+			</ul>
+		</div>
+	</header>
+
     <noscript data-path="<%= request.env['PATH_INFO'] %>">
-      <header class="d-header">
+      <div class="d-header">
         <div class="container">
           <div class="contents">
             <div class="row">
@@ -48,7 +74,7 @@
             </div>
           </div>
         </div>
-      </header>
+      </div>
       <div id="main-outlet" class="container">
         <!-- preload-content: -->
         <%= yield %>
@@ -85,6 +111,27 @@
     <%= yield :data %>
 
     <footer id='bottom'></footer>
+
+<!--<div id="footer-wrapper">
+	<footer id="footer-start">
+		<img id="logo" src="assets/footer-logo.png">
+		<div id="main-menu-wrapper">
+			<ul id="main-menu">
+				<li><a href="">Форум</a></li>
+				<li><a href="">Поради</a></li>
+				<li><a href="">Як це працює</a></li>
+				<li><a href="">Блог</a></li>
+				<li><a href="">Про нас</a></li>
+			</ul>
+			<ul id="main-menu-social">
+				<li id="facebook-page"></li>
+				<li id="vkontakte-page"></li>
+				<li id="twitter-page"></li>
+				<li id="odnoklassniki-page"></li>
+			</ul>
+		</div>
+	</footer>
+	</div>-->
 
     <%= render :partial => "common/discourse_javascript" %>
 
