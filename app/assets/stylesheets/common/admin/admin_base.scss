@@ -1023,3 +1023,337 @@ button.ru {
 .is-uploading:hover .ru-progress {
   background: rgba(200, 0, 0, 0.3);
 }
+
+// Custom code
+// ---------------------------------------------------
+
+@import url(http://fonts.googleapis.com/css?family=PT+Sans:400,700&subset=latin,cyrillic);
+
+header {
+    height: 130px;
+    margin: 0px auto;
+	width: 940px;
+}
+
+[title="Нові ідеї з моменту вашого останнього візиту"]{
+    display: none;
+}
+
+.category-dropdown-button {
+    display: none !important;
+}
+
+.category-dropdown-menu {
+    display: none;
+}
+
+.no-category {
+    display: none;
+}
+
+.spinner {
+    width: 130px !important;
+}
+
+#create-topic{
+    background-color: #0271bf;
+    color: white;
+}
+
+#create-topic:hover{
+    background-color: #eeeeee !important;
+    color: #333333 !important;
+}
+
+li.active a {
+    background-color: #333333 !important;
+}
+
+.nav-pills a:hover {
+    background-color: #eeeeee !important;
+    color: #333333 !important;
+}
+
+.ember-view .posters {
+    display: none;
+}
+
+.ember-view .activity {
+    display: none;
+}
+
+.featured-users{
+    display: none;
+}
+
+.d-header{
+    height: 70px;
+}
+
+#main-outlet{
+    padding-top: 90px;
+}
+
+#logo {
+	padding-top: 30px;
+}
+
+#main-menu-wrapper {
+	display: inline-block;
+	float: right;
+}
+
+#main-menu {
+	display: inline-block;
+}
+
+#main-menu li {
+	padding: 60px 8px 6px 8px;
+	color: #929497;
+	display: inline-block;
+	font-family: 'PT Sans', sans-serif;
+    font-size: 16px;
+}
+
+#main-menu li:hover{
+	text-decoration: none;
+	border-bottom: 1px #27aae0 solid;
+}
+
+#main-menu li a{
+	text-decoration: none;
+}
+
+#main-menu li a:active{
+	color: #929497;
+	text-decoration: none;
+}
+
+#main-menu li a:visited{
+	color: #929497;
+	text-decoration: none;
+}
+
+#main-menu-social {
+	position: relative;
+	top: 8px;
+	padding: 0 0 0 30px;
+	display: inline-block;
+}
+
+#facebook-page {
+	display: inline-block;
+	width: 27px;
+	height: 27px;
+	background: url("../../assets/header-icon-facebook.png");
+}
+
+#vkontakte-page {
+	display: inline-block;
+	width: 27px;
+	height: 27px;
+	background: url("../../assets/header-icon-vkontakte.png");
+}
+
+#twitter-page {
+	display: inline-block;
+	width: 27px;
+	height: 27px;
+	background: url("../../assets/header-icon-twitter.png");
+}
+
+#odnoklassniki-page {
+	display: inline-block;
+	width: 27px;
+	height: 27px;
+	background: url("../../assets/header-icon-odnoklassniki.png");
+}
+
+/*--*/
+#banner-wrapper {
+	background-color: #1c75bb;
+}
+
+#banner {
+	height: 410px;
+	margin: 0px auto;
+	width: 940px;
+	background: url('../img/banner-bg.png');
+	background-color: #1c75bb;
+}
+
+#banner h2 {
+	position: relative;
+	top: 230px;
+	left: 600px;
+	padding: 60px 8px 6px 8px;
+	color: white;
+	display: inline-block;
+	font-family: 'PT Sans', sans-serif;
+	font-size: 24px;
+	border-bottom: 1px white solid;
+	font-weight: normal;
+	padding: 0 0 8px 0;
+}
+
+#banner h1 {
+	position: relative;
+	top: 230px;
+	left: 600px;
+	width: 400px;
+	padding: 60px 8px 6px 8px;
+	color: white;
+	font-family: 'PT Sans', sans-serif;
+	font-size: 36px;
+	padding: 8px 0 0 0;
+}
+
+/*-----*/
+
+#story-wrapper {
+	background-color: #e3e8eb;
+}
+
+#story {
+	height: 1110px;
+	margin: 0px auto;
+	width: 940px;
+	background: url('../img/story-bg.png');
+	background-color: #e3e8eb;
+	position: relative;
+}
+
+ul h3 {
+	color: #1c75bb;
+	font-family: 'PT Sans', sans-serif;
+	font-size: 36px;
+}
+
+#story-1 {
+	position: absolute;
+	top: 30px;
+	left: 590px;
+}
+
+#story-2 {
+	position: absolute;
+	top: 390px;
+	left: 240px;
+}
+
+#story-3 {
+	position: absolute;
+	top: 760px;
+	left: 590px;
+}
+
+#story-1 li {
+	font-family: 'PT Sans', sans-serif;
+	color: #4a4a4a;
+	margin-top: 20px;
+	width: 300px;
+	line-height: 18px;
+}
+
+#story-2 li {
+	font-family: 'PT Sans', sans-serif;
+	color: #4a4a4a;
+	margin-top: 20px;
+	width: 300px;
+	line-height: 18px;
+}
+
+#story-3 li {
+	font-family: 'PT Sans', sans-serif;
+	color: #4a4a4a;
+	margin-top: 20px;
+	width: 300px;
+	line-height: 18px;
+}
+
+/*------*/
+
+#start-wrapper {
+	background-color: white;
+}
+
+#start {
+	height: 400px;
+	margin: 0px auto;
+	width: 940px;
+	background: url('../img/start-bg.png');
+	background-color: white;
+	position: relative;
+	text-align: center;
+}
+
+#message-1 {
+	position: relative;
+	top: 80px;
+	left: 40px;
+	font-family: 'PT Sans', sans-serif;
+	color: #1c75bb;
+	font-size: 18px;
+	line-height: 23px;
+}
+
+#message-2 {
+	display:block;
+	position: relative;
+	top: 100px;
+	left: 40px;
+	font-family: 'PT Sans', sans-serif;
+	color: #929497;
+	font-size: 16px;
+	line-height: 23px;
+}
+
+#message-3 a{
+	display:block;
+	position: relative;
+	left: 40px;
+	top: 228px;
+	font-family: 'PT Sans', sans-serif;
+	color: #929497;
+	font-size: 16px;
+	line-height: 23px;
+	text-decoration: none;
+	color: white;
+}
+
+#message-3 a:hover {
+		text-decoration: underline;
+}
+
+/*------*/
+
+#footer-wrapper {
+	background: #1c75bb;
+}
+
+#footer-start {
+	height: 130px;
+	margin: 0px auto;
+	width: 940px;
+	background: #1c75bb;
+}
+
+#logo {
+	padding-top: 30px;
+}
+
+#footer-start #main-menu-wrapper #main-menu li{
+	padding: 60px 8px 6px 8px;
+	color: white;
+	display: inline-block;
+	font-family: 'PT Sans', sans-serif;
+}
+
+#footer-start #main-menu-wrapper #main-menu li a:visited{
+	color: white;
+}
+
+#footer-start #main-menu-wrapper #main-menu li a:active{
+	color: white;
+}
+

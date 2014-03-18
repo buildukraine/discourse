@@ -699,3 +699,494 @@ Processing by ListController#unread as HTML
  THEN '3000-01-01'
  ELSE topics.bumped_at
  END DESC LIMIT 30[0m
+  Rendered list/list.erb within layouts/application (0.3ms)
+  Rendered common/_special_font_face.html.erb (30.1ms)
+  Rendered common/_discourse_stylesheet.html.erb (1657.9ms)
+  [1m[35mSiteContent Load (1.7ms)[0m  SELECT content FROM "site_contents" WHERE "site_contents"."content_type" = 'head' ORDER BY "site_contents"."content_type" ASC LIMIT 1
+  Rendered common/_discourse_javascript.html.erb (65.6ms)
+Completed 200 OK in 13624ms (Views: 13553.8ms | ActiveRecord: 38.6ms)
+
+
+Started GET "/unread" for 10.0.2.2 at 2014-03-18 11:20:13 -0400
+Processing by ListController#unread as HTML
+  [1m[36mCACHE (0.0ms)[0m  [1mSELECT "users".* FROM "users" WHERE "users"."auth_token" = '830a22421a66df3c04a9cfb27810b61c' ORDER BY "users"."id" ASC LIMIT 1[0m
+  [1m[35m (1.1ms)[0m  SELECT "groups"."name" FROM "groups"
+  [1m[36m (1.0ms)[0m  [1mSELECT categories.id FROM "categories" INNER JOIN "category_groups" ON "categories"."id" = "category_groups"."category_id" INNER JOIN "groups" ON "category_groups"."group_id" = "groups"."id" INNER JOIN "group_users" ON "groups"."id" = "group_users"."group_id" WHERE "group_users"."user_id" = $1[0m  [["user_id", 1]]
+  [1m[35mCategory Load (1.1ms)[0m  SELECT "categories".* FROM "categories" WHERE (NOT categories.read_restricted) ORDER BY "categories"."position" ASC
+  [1m[36mTopic Load (2.0ms)[0m  [1mSELECT id, title, slug FROM "topics" WHERE ("topics"."deleted_at" IS NULL) AND "topics"."id" IN (2)[0m
+  [1m[35mGroup Load (0.9ms)[0m  SELECT "groups".* FROM "groups" WHERE "groups"."id" = 0 ORDER BY "groups"."id" ASC LIMIT 1
+  [1m[36m (1.2ms)[0m  [1mSELECT "categories"."id" FROM "categories" WHERE (categories.id in (
+ SELECT c.id FROM categories c
+ WHERE (
+ NOT c.read_restricted AND
+ (
+ NOT EXISTS(
+ SELECT 1 FROM category_groups cg WHERE cg.category_id = categories.id )
+ ) OR EXISTS(
+ SELECT 1 FROM category_groups cg
+ WHERE permission_type in (1) AND
+ cg.category_id = categories.id AND
+ group_id IN (
+ SELECT g.group_id FROM group_users g where g.user_id = 1 UNION SELECT 0
+ )
+ )
+ )
+ ))[0m
+  [1m[35mPostActionType Load (1.0ms)[0m  SELECT "post_action_types".* FROM "post_action_types" ORDER BY position asc
+  [1m[36mPostActionType Load (1.0ms)[0m  [1mSELECT "post_action_types".* FROM "post_action_types" WHERE "post_action_types"."name_key" IN ('inappropriate', 'spam', 'notify_moderators') ORDER BY position asc[0m
+  [1m[35mSiteContent Load (1.1ms)[0m  SELECT content FROM "site_contents" WHERE "site_contents"."content_type" = 'top' ORDER BY "site_contents"."content_type" ASC LIMIT 1
+  [1m[36mSiteContent Load (1.1ms)[0m  [1mSELECT content FROM "site_contents" WHERE "site_contents"."content_type" = 'bottom' ORDER BY "site_contents"."content_type" ASC LIMIT 1[0m
+  [1m[35m (1.0ms)[0m  SELECT COUNT(*) AS count_all, notification_type AS notification_type FROM "notifications" WHERE "notifications"."user_id" = $1 AND (id > 0 and read = false) GROUP BY notification_type  [["user_id", 1]]
+  [1m[36m (0.5ms)[0m  [1mSELECT COUNT(*) FROM "notifications" WHERE "notifications"."user_id" = $1 AND (read = false AND notification_type = 6)[0m  [["user_id", 1]]
+  [1m[35mUserStat Load (1.6ms)[0m  SELECT "user_stats".* FROM "user_stats" WHERE "user_stats"."user_id" = $1 ORDER BY "user_stats"."user_id" ASC LIMIT 1  [["user_id", 1]]
+  [1m[36m (0.6ms)[0m  [1mSELECT COUNT(*) FROM "topics" WHERE ("topics"."deleted_at" IS NULL) AND "topics"."user_id" = $1[0m  [["user_id", 1]]
+  [1m[35m (1.2ms)[0m  SELECT COUNT(*) FROM "posts" WHERE ("posts"."deleted_at" IS NULL) AND "posts"."user_id" = $1  [["user_id", 1]]
+  [1m[36m (1.5ms)[0m  [1mSELECT COUNT(*) FROM "topics" WHERE ("topics"."deleted_at" IS NULL) AND (topics.archetype <> 'private_message') AND "topics"."visible" = 't' AND (topics.id NOT IN (SELECT COALESCE(topic_id, 0) FROM categories))[0m
+  [1m[35mCACHE (0.0ms)[0m  SELECT COUNT(*) FROM "topics" WHERE ("topics"."deleted_at" IS NULL) AND (topics.archetype <> 'private_message') AND "topics"."visible" = 't' AND (topics.id NOT IN (SELECT COALESCE(topic_id, 0) FROM categories))
+  [1m[36m (1.8ms)[0m  [1m SELECT u.id AS user_id,
+ topics.id AS topic_id,
+ topics.created_at,
+ highest_post_number,
+ last_read_post_number,
+ c.name AS category_name,
+ tu.notification_level
+ FROM users u
+ INNER JOIN user_stats AS us ON us.user_id = u.id
+ FULL OUTER JOIN topics ON 1=1
+ LEFT JOIN topic_users tu ON tu.topic_id = topics.id AND tu.user_id = u.id
+ LEFT JOIN categories c ON c.id = topics.category_id
+ WHERE u.id IN (1) AND
+ topics.archetype <> 'private_message' AND
+ ((tu.last_read_post_number < topics.highest_post_number AND COALESCE(tu.notification_level, 1) >= 2) OR (topics.created_at >= GREATEST(CASE
+ WHEN COALESCE(u.new_topic_duration_minutes, 2880) = -1 THEN u.created_at
+ WHEN COALESCE(u.new_topic_duration_minutes, 2880) = -2 THEN COALESCE(u.previous_visit_at,u.created_at)
+ ELSE ('2014-03-18 15:20:22.853903'::timestamp - INTERVAL '1 MINUTE' * COALESCE(u.new_topic_duration_minutes, 2880))
+ END, us.new_since) AND tu.last_read_post_number IS NULL AND COALESCE(tu.notification_level, 2) >= 2)) AND
+ (topics.visible OR u.admin OR u.moderator) AND
+ topics.deleted_at IS NULL AND
+ ( category_id IS NULL OR NOT c.read_restricted OR category_id IN (
+ SELECT c2.id FROM categories c2
+ JOIN category_groups cg ON cg.category_id = c2.id
+ JOIN group_users gu ON gu.user_id = u.id AND cg.group_id = gu.group_id
+ WHERE c2.read_restricted )
+ )
+ AND NOT EXISTS( SELECT 1 FROM category_users cu
+ WHERE cu.user_id = u.id AND
+ cu.category_id = topics.category_id AND
+ cu.notification_level = 0)
+
+ ORDER BY topics.bumped_at DESC LIMIT 500[0m
+  [1m[35m (0.9ms)[0m  SELECT "categories"."id" FROM "categories" WHERE "categories"."read_restricted" = 'f'
+  [1m[36mCACHE (0.0ms)[0m  [1mSELECT categories.id FROM "categories" INNER JOIN "category_groups" ON "categories"."id" = "category_groups"."category_id" INNER JOIN "groups" ON "category_groups"."group_id" = "groups"."id" INNER JOIN "group_users" ON "groups"."id" = "group_users"."group_id" WHERE "group_users"."user_id" = $1[0m  [["user_id", 1]]
+  [1m[35m (0.8ms)[0m  select sequence from draft_sequences where user_id = 1 and draft_key = 'new_topic'
+  [1m[36mDraft Load (0.9ms)[0m  [1mSELECT "drafts".* FROM "drafts" WHERE "drafts"."user_id" = 1 AND "drafts"."draft_key" = 'new_topic' ORDER BY "drafts"."id" ASC LIMIT 1[0m
+  [1m[35m (1.4ms)[0m  SELECT SUM("posts"."spam_count") AS sum_id FROM "posts" WHERE ("posts"."deleted_at" IS NULL) AND "posts"."user_id" = 1
+  [1m[36mSQL (2.4ms)[0m  [1mSELECT "topics"."id" AS t0_r0, "topics"."title" AS t0_r1, "topics"."last_posted_at" AS t0_r2, "topics"."created_at" AS t0_r3, "topics"."updated_at" AS t0_r4, "topics"."views" AS t0_r5, "topics"."posts_count" AS t0_r6, "topics"."user_id" AS t0_r7, "topics"."last_post_user_id" AS t0_r8, "topics"."reply_count" AS t0_r9, "topics"."featured_user1_id" AS t0_r10, "topics"."featured_user2_id" AS t0_r11, "topics"."featured_user3_id" AS t0_r12, "topics"."avg_time" AS t0_r13, "topics"."deleted_at" AS t0_r14, "topics"."highest_post_number" AS t0_r15, "topics"."image_url" AS t0_r16, "topics"."off_topic_count" AS t0_r17, "topics"."like_count" AS t0_r18, "topics"."incoming_link_count" AS t0_r19, "topics"."bookmark_count" AS t0_r20, "topics"."star_count" AS t0_r21, "topics"."category_id" AS t0_r22, "topics"."visible" AS t0_r23, "topics"."moderator_posts_count" AS t0_r24, "topics"."closed" AS t0_r25, "topics"."archived" AS t0_r26, "topics"."bumped_at" AS t0_r27, "topics"."has_summary" AS t0_r28, "topics"."meta_data" AS t0_r29, "topics"."vote_count" AS t0_r30, "topics"."archetype" AS t0_r31, "topics"."featured_user4_id" AS t0_r32, "topics"."notify_moderators_count" AS t0_r33, "topics"."spam_count" AS t0_r34, "topics"."illegal_count" AS t0_r35, "topics"."inappropriate_count" AS t0_r36, "topics"."pinned_at" AS t0_r37, "topics"."score" AS t0_r38, "topics"."percent_rank" AS t0_r39, "topics"."notify_user_count" AS t0_r40, "topics"."subtype" AS t0_r41, "topics"."slug" AS t0_r42, "topics"."auto_close_at" AS t0_r43, "topics"."auto_close_user_id" AS t0_r44, "topics"."auto_close_started_at" AS t0_r45, "topics"."deleted_by_id" AS t0_r46, "topics"."participant_count" AS t0_r47, "topics"."word_count" AS t0_r48, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1, "categories"."color" AS t1_r2, "categories"."topic_id" AS t1_r3, "categories"."topic_count" AS t1_r4, "categories"."created_at" AS t1_r5, "categories"."updated_at" AS t1_r6, "categories"."user_id" AS t1_r7, "categories"."topics_year" AS t1_r8, "categories"."topics_month" AS t1_r9, "categories"."topics_week" AS t1_r10, "categories"."slug" AS t1_r11, "categories"."description" AS t1_r12, "categories"."text_color" AS t1_r13, "categories"."read_restricted" AS t1_r14, "categories"."auto_close_hours" AS t1_r15, "categories"."post_count" AS t1_r16, "categories"."latest_post_id" AS t1_r17, "categories"."latest_topic_id" AS t1_r18, "categories"."position" AS t1_r19, "categories"."parent_category_id" AS t1_r20, "categories"."posts_year" AS t1_r21, "categories"."posts_month" AS t1_r22, "categories"."posts_week" AS t1_r23, "categories"."email_in" AS t1_r24, "categories"."email_in_allow_strangers" AS t1_r25, "topic_only_relative_urls_categories"."id" AS t2_r0, "topic_only_relative_urls_categories"."title" AS t2_r1, "topic_only_relative_urls_categories"."last_posted_at" AS t2_r2, "topic_only_relative_urls_categories"."created_at" AS t2_r3, "topic_only_relative_urls_categories"."updated_at" AS t2_r4, "topic_only_relative_urls_categories"."views" AS t2_r5, "topic_only_relative_urls_categories"."posts_count" AS t2_r6, "topic_only_relative_urls_categories"."user_id" AS t2_r7, "topic_only_relative_urls_categories"."last_post_user_id" AS t2_r8, "topic_only_relative_urls_categories"."reply_count" AS t2_r9, "topic_only_relative_urls_categories"."featured_user1_id" AS t2_r10, "topic_only_relative_urls_categories"."featured_user2_id" AS t2_r11, "topic_only_relative_urls_categories"."featured_user3_id" AS t2_r12, "topic_only_relative_urls_categories"."avg_time" AS t2_r13, "topic_only_relative_urls_categories"."deleted_at" AS t2_r14, "topic_only_relative_urls_categories"."highest_post_number" AS t2_r15, "topic_only_relative_urls_categories"."image_url" AS t2_r16, "topic_only_relative_urls_categories"."off_topic_count" AS t2_r17, "topic_only_relative_urls_categories"."like_count" AS t2_r18, "topic_only_relative_urls_categories"."incoming_link_count" AS t2_r19, "topic_only_relative_urls_categories"."bookmark_count" AS t2_r20, "topic_only_relative_urls_categories"."star_count" AS t2_r21, "topic_only_relative_urls_categories"."category_id" AS t2_r22, "topic_only_relative_urls_categories"."visible" AS t2_r23, "topic_only_relative_urls_categories"."moderator_posts_count" AS t2_r24, "topic_only_relative_urls_categories"."closed" AS t2_r25, "topic_only_relative_urls_categories"."archived" AS t2_r26, "topic_only_relative_urls_categories"."bumped_at" AS t2_r27, "topic_only_relative_urls_categories"."has_summary" AS t2_r28, "topic_only_relative_urls_categories"."meta_data" AS t2_r29, "topic_only_relative_urls_categories"."vote_count" AS t2_r30, "topic_only_relative_urls_categories"."archetype" AS t2_r31, "topic_only_relative_urls_categories"."featured_user4_id" AS t2_r32, "topic_only_relative_urls_categories"."notify_moderators_count" AS t2_r33, "topic_only_relative_urls_categories"."spam_count" AS t2_r34, "topic_only_relative_urls_categories"."illegal_count" AS t2_r35, "topic_only_relative_urls_categories"."inappropriate_count" AS t2_r36, "topic_only_relative_urls_categories"."pinned_at" AS t2_r37, "topic_only_relative_urls_categories"."score" AS t2_r38, "topic_only_relative_urls_categories"."percent_rank" AS t2_r39, "topic_only_relative_urls_categories"."notify_user_count" AS t2_r40, "topic_only_relative_urls_categories"."subtype" AS t2_r41, "topic_only_relative_urls_categories"."slug" AS t2_r42, "topic_only_relative_urls_categories"."auto_close_at" AS t2_r43, "topic_only_relative_urls_categories"."auto_close_user_id" AS t2_r44, "topic_only_relative_urls_categories"."auto_close_started_at" AS t2_r45, "topic_only_relative_urls_categories"."deleted_by_id" AS t2_r46, "topic_only_relative_urls_categories"."participant_count" AS t2_r47, "topic_only_relative_urls_categories"."word_count" AS t2_r48 FROM "topics" LEFT OUTER JOIN "categories" ON "categories"."id" = "topics"."category_id" LEFT OUTER JOIN "topics" "topic_only_relative_urls_categories" ON "topic_only_relative_urls_categories"."id" = "categories"."topic_id" AND ("topics"."deleted_at" IS NULL) LEFT OUTER JOIN topic_users AS tu ON (topics.id = tu.topic_id AND tu.user_id = 1) WHERE ("topics"."deleted_at" IS NULL) AND (topics.archetype <> 'private_message') AND "topics"."visible" = 't' AND (topics.category_id IS NULL or topics.category_id IN (3,1)) AND (tu.last_read_post_number < topics.highest_post_number) AND (COALESCE(tu.notification_level, 1) >= 2) ORDER BY CASE WHEN topics.user_id = tu.user_id THEN 1 ELSE 2 END, CASE
+ WHEN topics.category_id = 1 and (COALESCE(topics.pinned_at, '2010-01-01') > COALESCE(tu.cleared_pinned_at, '2010-01-01'))
+ THEN '3000-01-01'
+ ELSE topics.bumped_at
+ END DESC LIMIT 30[0m
+  Rendered list/list.erb within layouts/application (0.2ms)
+  Rendered common/_special_font_face.html.erb (29.9ms)
+  Rendered common/_discourse_stylesheet.html.erb (1735.2ms)
+  [1m[35mSiteContent Load (1.4ms)[0m  SELECT content FROM "site_contents" WHERE "site_contents"."content_type" = 'head' ORDER BY "site_contents"."content_type" ASC LIMIT 1
+  Rendered common/_discourse_javascript.html.erb (69.9ms)
+Completed 200 OK in 14190ms (Views: 14132.8ms | ActiveRecord: 27.6ms)
+
+
+Started GET "/latest.json" for 10.0.2.2 at 2014-03-18 11:23:36 -0400
+Processing by ListController#latest as JSON
+  [1m[36mCACHE (0.0ms)[0m  [1mSELECT "users".* FROM "users" WHERE "users"."auth_token" = '830a22421a66df3c04a9cfb27810b61c' ORDER BY "users"."id" ASC LIMIT 1[0m
+  [1m[35m (1.3ms)[0m  SELECT "categories"."id" FROM "categories" WHERE "categories"."read_restricted" = 'f'
+  [1m[36m (0.7ms)[0m  [1mSELECT categories.id FROM "categories" INNER JOIN "category_groups" ON "categories"."id" = "category_groups"."category_id" INNER JOIN "groups" ON "category_groups"."group_id" = "groups"."id" INNER JOIN "group_users" ON "groups"."id" = "group_users"."group_id" WHERE "group_users"."user_id" = $1[0m  [["user_id", 1]]
+  [1m[35m (1.0ms)[0m  select sequence from draft_sequences where user_id = 1 and draft_key = 'new_topic'
+  [1m[36mDraft Load (1.0ms)[0m  [1mSELECT "drafts".* FROM "drafts" WHERE "drafts"."user_id" = 1 AND "drafts"."draft_key" = 'new_topic' ORDER BY "drafts"."id" ASC LIMIT 1[0m
+  [1m[35m (1.1ms)[0m  SELECT SUM("posts"."spam_count") AS sum_id FROM "posts" WHERE ("posts"."deleted_at" IS NULL) AND "posts"."user_id" = 1
+  [1m[36mSQL (3.9ms)[0m  [1mSELECT "topics"."id" AS t0_r0, "topics"."title" AS t0_r1, "topics"."last_posted_at" AS t0_r2, "topics"."created_at" AS t0_r3, "topics"."updated_at" AS t0_r4, "topics"."views" AS t0_r5, "topics"."posts_count" AS t0_r6, "topics"."user_id" AS t0_r7, "topics"."last_post_user_id" AS t0_r8, "topics"."reply_count" AS t0_r9, "topics"."featured_user1_id" AS t0_r10, "topics"."featured_user2_id" AS t0_r11, "topics"."featured_user3_id" AS t0_r12, "topics"."avg_time" AS t0_r13, "topics"."deleted_at" AS t0_r14, "topics"."highest_post_number" AS t0_r15, "topics"."image_url" AS t0_r16, "topics"."off_topic_count" AS t0_r17, "topics"."like_count" AS t0_r18, "topics"."incoming_link_count" AS t0_r19, "topics"."bookmark_count" AS t0_r20, "topics"."star_count" AS t0_r21, "topics"."category_id" AS t0_r22, "topics"."visible" AS t0_r23, "topics"."moderator_posts_count" AS t0_r24, "topics"."closed" AS t0_r25, "topics"."archived" AS t0_r26, "topics"."bumped_at" AS t0_r27, "topics"."has_summary" AS t0_r28, "topics"."meta_data" AS t0_r29, "topics"."vote_count" AS t0_r30, "topics"."archetype" AS t0_r31, "topics"."featured_user4_id" AS t0_r32, "topics"."notify_moderators_count" AS t0_r33, "topics"."spam_count" AS t0_r34, "topics"."illegal_count" AS t0_r35, "topics"."inappropriate_count" AS t0_r36, "topics"."pinned_at" AS t0_r37, "topics"."score" AS t0_r38, "topics"."percent_rank" AS t0_r39, "topics"."notify_user_count" AS t0_r40, "topics"."subtype" AS t0_r41, "topics"."slug" AS t0_r42, "topics"."auto_close_at" AS t0_r43, "topics"."auto_close_user_id" AS t0_r44, "topics"."auto_close_started_at" AS t0_r45, "topics"."deleted_by_id" AS t0_r46, "topics"."participant_count" AS t0_r47, "topics"."word_count" AS t0_r48, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1, "categories"."color" AS t1_r2, "categories"."topic_id" AS t1_r3, "categories"."topic_count" AS t1_r4, "categories"."created_at" AS t1_r5, "categories"."updated_at" AS t1_r6, "categories"."user_id" AS t1_r7, "categories"."topics_year" AS t1_r8, "categories"."topics_month" AS t1_r9, "categories"."topics_week" AS t1_r10, "categories"."slug" AS t1_r11, "categories"."description" AS t1_r12, "categories"."text_color" AS t1_r13, "categories"."read_restricted" AS t1_r14, "categories"."auto_close_hours" AS t1_r15, "categories"."post_count" AS t1_r16, "categories"."latest_post_id" AS t1_r17, "categories"."latest_topic_id" AS t1_r18, "categories"."position" AS t1_r19, "categories"."parent_category_id" AS t1_r20, "categories"."posts_year" AS t1_r21, "categories"."posts_month" AS t1_r22, "categories"."posts_week" AS t1_r23, "categories"."email_in" AS t1_r24, "categories"."email_in_allow_strangers" AS t1_r25, "topic_only_relative_urls_categories"."id" AS t2_r0, "topic_only_relative_urls_categories"."title" AS t2_r1, "topic_only_relative_urls_categories"."last_posted_at" AS t2_r2, "topic_only_relative_urls_categories"."created_at" AS t2_r3, "topic_only_relative_urls_categories"."updated_at" AS t2_r4, "topic_only_relative_urls_categories"."views" AS t2_r5, "topic_only_relative_urls_categories"."posts_count" AS t2_r6, "topic_only_relative_urls_categories"."user_id" AS t2_r7, "topic_only_relative_urls_categories"."last_post_user_id" AS t2_r8, "topic_only_relative_urls_categories"."reply_count" AS t2_r9, "topic_only_relative_urls_categories"."featured_user1_id" AS t2_r10, "topic_only_relative_urls_categories"."featured_user2_id" AS t2_r11, "topic_only_relative_urls_categories"."featured_user3_id" AS t2_r12, "topic_only_relative_urls_categories"."avg_time" AS t2_r13, "topic_only_relative_urls_categories"."deleted_at" AS t2_r14, "topic_only_relative_urls_categories"."highest_post_number" AS t2_r15, "topic_only_relative_urls_categories"."image_url" AS t2_r16, "topic_only_relative_urls_categories"."off_topic_count" AS t2_r17, "topic_only_relative_urls_categories"."like_count" AS t2_r18, "topic_only_relative_urls_categories"."incoming_link_count" AS t2_r19, "topic_only_relative_urls_categories"."bookmark_count" AS t2_r20, "topic_only_relative_urls_categories"."star_count" AS t2_r21, "topic_only_relative_urls_categories"."category_id" AS t2_r22, "topic_only_relative_urls_categories"."visible" AS t2_r23, "topic_only_relative_urls_categories"."moderator_posts_count" AS t2_r24, "topic_only_relative_urls_categories"."closed" AS t2_r25, "topic_only_relative_urls_categories"."archived" AS t2_r26, "topic_only_relative_urls_categories"."bumped_at" AS t2_r27, "topic_only_relative_urls_categories"."has_summary" AS t2_r28, "topic_only_relative_urls_categories"."meta_data" AS t2_r29, "topic_only_relative_urls_categories"."vote_count" AS t2_r30, "topic_only_relative_urls_categories"."archetype" AS t2_r31, "topic_only_relative_urls_categories"."featured_user4_id" AS t2_r32, "topic_only_relative_urls_categories"."notify_moderators_count" AS t2_r33, "topic_only_relative_urls_categories"."spam_count" AS t2_r34, "topic_only_relative_urls_categories"."illegal_count" AS t2_r35, "topic_only_relative_urls_categories"."inappropriate_count" AS t2_r36, "topic_only_relative_urls_categories"."pinned_at" AS t2_r37, "topic_only_relative_urls_categories"."score" AS t2_r38, "topic_only_relative_urls_categories"."percent_rank" AS t2_r39, "topic_only_relative_urls_categories"."notify_user_count" AS t2_r40, "topic_only_relative_urls_categories"."subtype" AS t2_r41, "topic_only_relative_urls_categories"."slug" AS t2_r42, "topic_only_relative_urls_categories"."auto_close_at" AS t2_r43, "topic_only_relative_urls_categories"."auto_close_user_id" AS t2_r44, "topic_only_relative_urls_categories"."auto_close_started_at" AS t2_r45, "topic_only_relative_urls_categories"."deleted_by_id" AS t2_r46, "topic_only_relative_urls_categories"."participant_count" AS t2_r47, "topic_only_relative_urls_categories"."word_count" AS t2_r48 FROM "topics" LEFT OUTER JOIN "categories" ON "categories"."id" = "topics"."category_id" LEFT OUTER JOIN "topics" "topic_only_relative_urls_categories" ON "topic_only_relative_urls_categories"."id" = "categories"."topic_id" AND ("topics"."deleted_at" IS NULL) LEFT OUTER JOIN topic_users AS tu ON (topics.id = tu.topic_id AND tu.user_id = 1) WHERE ("topics"."deleted_at" IS NULL) AND (topics.archetype <> 'private_message') AND (COALESCE(categories.topic_id, 0) <> topics.id) AND "topics"."visible" = 't' AND (topics.category_id IS NULL or topics.category_id IN (3,1)) AND (NOT EXISTS(
+ SELECT 1 FROM category_users cu
+ WHERE cu.user_id = 1 AND
+ cu.category_id = topics.category_id AND
+ cu.notification_level = 0
+ )) ORDER BY CASE
+ WHEN topics.category_id = 1 and (COALESCE(topics.pinned_at, '2010-01-01') > COALESCE(tu.cleared_pinned_at, '2010-01-01'))
+ THEN '3000-01-01'
+ ELSE topics.bumped_at
+ END DESC LIMIT 30[0m
+  [1m[35mTopicUser Load (1.7ms)[0m  SELECT "topic_users".* FROM "topic_users" WHERE "topic_users"."topic_id" IN (6) AND "topic_users"."user_id" = 1
+  [1m[36mUser Load (1.4ms)[0m  [1mSELECT id, email, username, use_uploaded_avatar, uploaded_avatar_template, uploaded_avatar_id FROM "users" WHERE "users"."id" IN (-1)[0m
+  [1m[35mUserStat Load (1.6ms)[0m  SELECT "user_stats".* FROM "user_stats" WHERE "user_stats"."user_id" = $1 ORDER BY "user_stats"."user_id" ASC LIMIT 1  [["user_id", 1]]
+  [1m[36mPost Load (1.7ms)[0m  [1mSELECT "posts".* FROM "posts" WHERE ("posts"."deleted_at" IS NULL) AND "posts"."topic_id" = $1 ORDER BY post_number ASC LIMIT 1[0m  [["topic_id", 6]]
+Completed 200 OK in 32ms (Views: 0.1ms | ActiveRecord: 15.5ms)
+
+
+Started GET "/new.json" for 10.0.2.2 at 2014-03-18 11:24:19 -0400
+Processing by ListController#new as JSON
+  [1m[35mCACHE (0.0ms)[0m  SELECT "users".* FROM "users" WHERE "users"."auth_token" = '830a22421a66df3c04a9cfb27810b61c' ORDER BY "users"."id" ASC LIMIT 1
+  [1m[36m (2.4ms)[0m  [1mSELECT "categories"."id" FROM "categories" WHERE "categories"."read_restricted" = 'f'[0m
+  [1m[35m (0.4ms)[0m  SELECT categories.id FROM "categories" INNER JOIN "category_groups" ON "categories"."id" = "category_groups"."category_id" INNER JOIN "groups" ON "category_groups"."group_id" = "groups"."id" INNER JOIN "group_users" ON "groups"."id" = "group_users"."group_id" WHERE "group_users"."user_id" = $1  [["user_id", 1]]
+  [1m[36mUserStat Load (1.0ms)[0m  [1mSELECT "user_stats".* FROM "user_stats" WHERE "user_stats"."user_id" = $1 ORDER BY "user_stats"."user_id" ASC LIMIT 1[0m  [["user_id", 1]]
+  [1m[35m (0.9ms)[0m  select sequence from draft_sequences where user_id = 1 and draft_key = 'new_topic'
+  [1m[36mDraft Load (1.0ms)[0m  [1mSELECT "drafts".* FROM "drafts" WHERE "drafts"."user_id" = 1 AND "drafts"."draft_key" = 'new_topic' ORDER BY "drafts"."id" ASC LIMIT 1[0m
+  [1m[35m (1.1ms)[0m  SELECT SUM("posts"."spam_count") AS sum_id FROM "posts" WHERE ("posts"."deleted_at" IS NULL) AND "posts"."user_id" = 1
+  [1m[36mSQL (2.4ms)[0m  [1mSELECT "topics"."id" AS t0_r0, "topics"."title" AS t0_r1, "topics"."last_posted_at" AS t0_r2, "topics"."created_at" AS t0_r3, "topics"."updated_at" AS t0_r4, "topics"."views" AS t0_r5, "topics"."posts_count" AS t0_r6, "topics"."user_id" AS t0_r7, "topics"."last_post_user_id" AS t0_r8, "topics"."reply_count" AS t0_r9, "topics"."featured_user1_id" AS t0_r10, "topics"."featured_user2_id" AS t0_r11, "topics"."featured_user3_id" AS t0_r12, "topics"."avg_time" AS t0_r13, "topics"."deleted_at" AS t0_r14, "topics"."highest_post_number" AS t0_r15, "topics"."image_url" AS t0_r16, "topics"."off_topic_count" AS t0_r17, "topics"."like_count" AS t0_r18, "topics"."incoming_link_count" AS t0_r19, "topics"."bookmark_count" AS t0_r20, "topics"."star_count" AS t0_r21, "topics"."category_id" AS t0_r22, "topics"."visible" AS t0_r23, "topics"."moderator_posts_count" AS t0_r24, "topics"."closed" AS t0_r25, "topics"."archived" AS t0_r26, "topics"."bumped_at" AS t0_r27, "topics"."has_summary" AS t0_r28, "topics"."meta_data" AS t0_r29, "topics"."vote_count" AS t0_r30, "topics"."archetype" AS t0_r31, "topics"."featured_user4_id" AS t0_r32, "topics"."notify_moderators_count" AS t0_r33, "topics"."spam_count" AS t0_r34, "topics"."illegal_count" AS t0_r35, "topics"."inappropriate_count" AS t0_r36, "topics"."pinned_at" AS t0_r37, "topics"."score" AS t0_r38, "topics"."percent_rank" AS t0_r39, "topics"."notify_user_count" AS t0_r40, "topics"."subtype" AS t0_r41, "topics"."slug" AS t0_r42, "topics"."auto_close_at" AS t0_r43, "topics"."auto_close_user_id" AS t0_r44, "topics"."auto_close_started_at" AS t0_r45, "topics"."deleted_by_id" AS t0_r46, "topics"."participant_count" AS t0_r47, "topics"."word_count" AS t0_r48, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1, "categories"."color" AS t1_r2, "categories"."topic_id" AS t1_r3, "categories"."topic_count" AS t1_r4, "categories"."created_at" AS t1_r5, "categories"."updated_at" AS t1_r6, "categories"."user_id" AS t1_r7, "categories"."topics_year" AS t1_r8, "categories"."topics_month" AS t1_r9, "categories"."topics_week" AS t1_r10, "categories"."slug" AS t1_r11, "categories"."description" AS t1_r12, "categories"."text_color" AS t1_r13, "categories"."read_restricted" AS t1_r14, "categories"."auto_close_hours" AS t1_r15, "categories"."post_count" AS t1_r16, "categories"."latest_post_id" AS t1_r17, "categories"."latest_topic_id" AS t1_r18, "categories"."position" AS t1_r19, "categories"."parent_category_id" AS t1_r20, "categories"."posts_year" AS t1_r21, "categories"."posts_month" AS t1_r22, "categories"."posts_week" AS t1_r23, "categories"."email_in" AS t1_r24, "categories"."email_in_allow_strangers" AS t1_r25, "topic_only_relative_urls_categories"."id" AS t2_r0, "topic_only_relative_urls_categories"."title" AS t2_r1, "topic_only_relative_urls_categories"."last_posted_at" AS t2_r2, "topic_only_relative_urls_categories"."created_at" AS t2_r3, "topic_only_relative_urls_categories"."updated_at" AS t2_r4, "topic_only_relative_urls_categories"."views" AS t2_r5, "topic_only_relative_urls_categories"."posts_count" AS t2_r6, "topic_only_relative_urls_categories"."user_id" AS t2_r7, "topic_only_relative_urls_categories"."last_post_user_id" AS t2_r8, "topic_only_relative_urls_categories"."reply_count" AS t2_r9, "topic_only_relative_urls_categories"."featured_user1_id" AS t2_r10, "topic_only_relative_urls_categories"."featured_user2_id" AS t2_r11, "topic_only_relative_urls_categories"."featured_user3_id" AS t2_r12, "topic_only_relative_urls_categories"."avg_time" AS t2_r13, "topic_only_relative_urls_categories"."deleted_at" AS t2_r14, "topic_only_relative_urls_categories"."highest_post_number" AS t2_r15, "topic_only_relative_urls_categories"."image_url" AS t2_r16, "topic_only_relative_urls_categories"."off_topic_count" AS t2_r17, "topic_only_relative_urls_categories"."like_count" AS t2_r18, "topic_only_relative_urls_categories"."incoming_link_count" AS t2_r19, "topic_only_relative_urls_categories"."bookmark_count" AS t2_r20, "topic_only_relative_urls_categories"."star_count" AS t2_r21, "topic_only_relative_urls_categories"."category_id" AS t2_r22, "topic_only_relative_urls_categories"."visible" AS t2_r23, "topic_only_relative_urls_categories"."moderator_posts_count" AS t2_r24, "topic_only_relative_urls_categories"."closed" AS t2_r25, "topic_only_relative_urls_categories"."archived" AS t2_r26, "topic_only_relative_urls_categories"."bumped_at" AS t2_r27, "topic_only_relative_urls_categories"."has_summary" AS t2_r28, "topic_only_relative_urls_categories"."meta_data" AS t2_r29, "topic_only_relative_urls_categories"."vote_count" AS t2_r30, "topic_only_relative_urls_categories"."archetype" AS t2_r31, "topic_only_relative_urls_categories"."featured_user4_id" AS t2_r32, "topic_only_relative_urls_categories"."notify_moderators_count" AS t2_r33, "topic_only_relative_urls_categories"."spam_count" AS t2_r34, "topic_only_relative_urls_categories"."illegal_count" AS t2_r35, "topic_only_relative_urls_categories"."inappropriate_count" AS t2_r36, "topic_only_relative_urls_categories"."pinned_at" AS t2_r37, "topic_only_relative_urls_categories"."score" AS t2_r38, "topic_only_relative_urls_categories"."percent_rank" AS t2_r39, "topic_only_relative_urls_categories"."notify_user_count" AS t2_r40, "topic_only_relative_urls_categories"."subtype" AS t2_r41, "topic_only_relative_urls_categories"."slug" AS t2_r42, "topic_only_relative_urls_categories"."auto_close_at" AS t2_r43, "topic_only_relative_urls_categories"."auto_close_user_id" AS t2_r44, "topic_only_relative_urls_categories"."auto_close_started_at" AS t2_r45, "topic_only_relative_urls_categories"."deleted_by_id" AS t2_r46, "topic_only_relative_urls_categories"."participant_count" AS t2_r47, "topic_only_relative_urls_categories"."word_count" AS t2_r48 FROM "topics" LEFT OUTER JOIN "categories" ON "categories"."id" = "topics"."category_id" LEFT OUTER JOIN "topics" "topic_only_relative_urls_categories" ON "topic_only_relative_urls_categories"."id" = "categories"."topic_id" AND ("topics"."deleted_at" IS NULL) LEFT OUTER JOIN topic_users AS tu ON (topics.id = tu.topic_id AND tu.user_id = 1) WHERE ("topics"."deleted_at" IS NULL) AND (topics.archetype <> 'private_message') AND "topics"."visible" = 't' AND (topics.category_id IS NULL or topics.category_id IN (3,1)) AND (topics.created_at >= '2014-03-18 12:08:51.151254') AND (tu.last_read_post_number IS NULL) AND (COALESCE(tu.notification_level, 2) >= 2) AND (NOT EXISTS(
+ SELECT 1 FROM category_users cu
+ WHERE cu.user_id = 1 AND
+ cu.category_id = topics.category_id AND
+ cu.notification_level = 0
+ )) ORDER BY CASE
+ WHEN topics.category_id = 1 and (COALESCE(topics.pinned_at, '2010-01-01') > COALESCE(tu.cleared_pinned_at, '2010-01-01'))
+ THEN '3000-01-01'
+ ELSE topics.bumped_at
+ END DESC LIMIT 30[0m
+Completed 200 OK in 22ms (Views: 0.1ms | ActiveRecord: 9.4ms)
+
+
+Started GET "/latest.json" for 10.0.2.2 at 2014-03-18 11:24:33 -0400
+Processing by ListController#latest as JSON
+  [1m[35mUser Load (2.6ms)[0m  SELECT "users".* FROM "users" WHERE "users"."auth_token" = '830a22421a66df3c04a9cfb27810b61c' ORDER BY "users"."id" ASC LIMIT 1
+  [1m[36m (1.0ms)[0m  [1mSELECT "categories"."id" FROM "categories" WHERE "categories"."read_restricted" = 'f'[0m
+  [1m[35m (1.1ms)[0m  SELECT categories.id FROM "categories" INNER JOIN "category_groups" ON "categories"."id" = "category_groups"."category_id" INNER JOIN "groups" ON "category_groups"."group_id" = "groups"."id" INNER JOIN "group_users" ON "groups"."id" = "group_users"."group_id" WHERE "group_users"."user_id" = $1  [["user_id", 1]]
+  [1m[36m (1.0ms)[0m  [1mselect sequence from draft_sequences where user_id = 1 and draft_key = 'new_topic'[0m
+  [1m[35mDraft Load (1.1ms)[0m  SELECT "drafts".* FROM "drafts" WHERE "drafts"."user_id" = 1 AND "drafts"."draft_key" = 'new_topic' ORDER BY "drafts"."id" ASC LIMIT 1
+  [1m[36m (1.0ms)[0m  [1mSELECT SUM("posts"."spam_count") AS sum_id FROM "posts" WHERE ("posts"."deleted_at" IS NULL) AND "posts"."user_id" = 1[0m
+  [1m[35mSQL (2.8ms)[0m  SELECT "topics"."id" AS t0_r0, "topics"."title" AS t0_r1, "topics"."last_posted_at" AS t0_r2, "topics"."created_at" AS t0_r3, "topics"."updated_at" AS t0_r4, "topics"."views" AS t0_r5, "topics"."posts_count" AS t0_r6, "topics"."user_id" AS t0_r7, "topics"."last_post_user_id" AS t0_r8, "topics"."reply_count" AS t0_r9, "topics"."featured_user1_id" AS t0_r10, "topics"."featured_user2_id" AS t0_r11, "topics"."featured_user3_id" AS t0_r12, "topics"."avg_time" AS t0_r13, "topics"."deleted_at" AS t0_r14, "topics"."highest_post_number" AS t0_r15, "topics"."image_url" AS t0_r16, "topics"."off_topic_count" AS t0_r17, "topics"."like_count" AS t0_r18, "topics"."incoming_link_count" AS t0_r19, "topics"."bookmark_count" AS t0_r20, "topics"."star_count" AS t0_r21, "topics"."category_id" AS t0_r22, "topics"."visible" AS t0_r23, "topics"."moderator_posts_count" AS t0_r24, "topics"."closed" AS t0_r25, "topics"."archived" AS t0_r26, "topics"."bumped_at" AS t0_r27, "topics"."has_summary" AS t0_r28, "topics"."meta_data" AS t0_r29, "topics"."vote_count" AS t0_r30, "topics"."archetype" AS t0_r31, "topics"."featured_user4_id" AS t0_r32, "topics"."notify_moderators_count" AS t0_r33, "topics"."spam_count" AS t0_r34, "topics"."illegal_count" AS t0_r35, "topics"."inappropriate_count" AS t0_r36, "topics"."pinned_at" AS t0_r37, "topics"."score" AS t0_r38, "topics"."percent_rank" AS t0_r39, "topics"."notify_user_count" AS t0_r40, "topics"."subtype" AS t0_r41, "topics"."slug" AS t0_r42, "topics"."auto_close_at" AS t0_r43, "topics"."auto_close_user_id" AS t0_r44, "topics"."auto_close_started_at" AS t0_r45, "topics"."deleted_by_id" AS t0_r46, "topics"."participant_count" AS t0_r47, "topics"."word_count" AS t0_r48, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1, "categories"."color" AS t1_r2, "categories"."topic_id" AS t1_r3, "categories"."topic_count" AS t1_r4, "categories"."created_at" AS t1_r5, "categories"."updated_at" AS t1_r6, "categories"."user_id" AS t1_r7, "categories"."topics_year" AS t1_r8, "categories"."topics_month" AS t1_r9, "categories"."topics_week" AS t1_r10, "categories"."slug" AS t1_r11, "categories"."description" AS t1_r12, "categories"."text_color" AS t1_r13, "categories"."read_restricted" AS t1_r14, "categories"."auto_close_hours" AS t1_r15, "categories"."post_count" AS t1_r16, "categories"."latest_post_id" AS t1_r17, "categories"."latest_topic_id" AS t1_r18, "categories"."position" AS t1_r19, "categories"."parent_category_id" AS t1_r20, "categories"."posts_year" AS t1_r21, "categories"."posts_month" AS t1_r22, "categories"."posts_week" AS t1_r23, "categories"."email_in" AS t1_r24, "categories"."email_in_allow_strangers" AS t1_r25, "topic_only_relative_urls_categories"."id" AS t2_r0, "topic_only_relative_urls_categories"."title" AS t2_r1, "topic_only_relative_urls_categories"."last_posted_at" AS t2_r2, "topic_only_relative_urls_categories"."created_at" AS t2_r3, "topic_only_relative_urls_categories"."updated_at" AS t2_r4, "topic_only_relative_urls_categories"."views" AS t2_r5, "topic_only_relative_urls_categories"."posts_count" AS t2_r6, "topic_only_relative_urls_categories"."user_id" AS t2_r7, "topic_only_relative_urls_categories"."last_post_user_id" AS t2_r8, "topic_only_relative_urls_categories"."reply_count" AS t2_r9, "topic_only_relative_urls_categories"."featured_user1_id" AS t2_r10, "topic_only_relative_urls_categories"."featured_user2_id" AS t2_r11, "topic_only_relative_urls_categories"."featured_user3_id" AS t2_r12, "topic_only_relative_urls_categories"."avg_time" AS t2_r13, "topic_only_relative_urls_categories"."deleted_at" AS t2_r14, "topic_only_relative_urls_categories"."highest_post_number" AS t2_r15, "topic_only_relative_urls_categories"."image_url" AS t2_r16, "topic_only_relative_urls_categories"."off_topic_count" AS t2_r17, "topic_only_relative_urls_categories"."like_count" AS t2_r18, "topic_only_relative_urls_categories"."incoming_link_count" AS t2_r19, "topic_only_relative_urls_categories"."bookmark_count" AS t2_r20, "topic_only_relative_urls_categories"."star_count" AS t2_r21, "topic_only_relative_urls_categories"."category_id" AS t2_r22, "topic_only_relative_urls_categories"."visible" AS t2_r23, "topic_only_relative_urls_categories"."moderator_posts_count" AS t2_r24, "topic_only_relative_urls_categories"."closed" AS t2_r25, "topic_only_relative_urls_categories"."archived" AS t2_r26, "topic_only_relative_urls_categories"."bumped_at" AS t2_r27, "topic_only_relative_urls_categories"."has_summary" AS t2_r28, "topic_only_relative_urls_categories"."meta_data" AS t2_r29, "topic_only_relative_urls_categories"."vote_count" AS t2_r30, "topic_only_relative_urls_categories"."archetype" AS t2_r31, "topic_only_relative_urls_categories"."featured_user4_id" AS t2_r32, "topic_only_relative_urls_categories"."notify_moderators_count" AS t2_r33, "topic_only_relative_urls_categories"."spam_count" AS t2_r34, "topic_only_relative_urls_categories"."illegal_count" AS t2_r35, "topic_only_relative_urls_categories"."inappropriate_count" AS t2_r36, "topic_only_relative_urls_categories"."pinned_at" AS t2_r37, "topic_only_relative_urls_categories"."score" AS t2_r38, "topic_only_relative_urls_categories"."percent_rank" AS t2_r39, "topic_only_relative_urls_categories"."notify_user_count" AS t2_r40, "topic_only_relative_urls_categories"."subtype" AS t2_r41, "topic_only_relative_urls_categories"."slug" AS t2_r42, "topic_only_relative_urls_categories"."auto_close_at" AS t2_r43, "topic_only_relative_urls_categories"."auto_close_user_id" AS t2_r44, "topic_only_relative_urls_categories"."auto_close_started_at" AS t2_r45, "topic_only_relative_urls_categories"."deleted_by_id" AS t2_r46, "topic_only_relative_urls_categories"."participant_count" AS t2_r47, "topic_only_relative_urls_categories"."word_count" AS t2_r48 FROM "topics" LEFT OUTER JOIN "categories" ON "categories"."id" = "topics"."category_id" LEFT OUTER JOIN "topics" "topic_only_relative_urls_categories" ON "topic_only_relative_urls_categories"."id" = "categories"."topic_id" AND ("topics"."deleted_at" IS NULL) LEFT OUTER JOIN topic_users AS tu ON (topics.id = tu.topic_id AND tu.user_id = 1) WHERE ("topics"."deleted_at" IS NULL) AND (topics.archetype <> 'private_message') AND (COALESCE(categories.topic_id, 0) <> topics.id) AND "topics"."visible" = 't' AND (topics.category_id IS NULL or topics.category_id IN (3,1)) AND (NOT EXISTS(
+ SELECT 1 FROM category_users cu
+ WHERE cu.user_id = 1 AND
+ cu.category_id = topics.category_id AND
+ cu.notification_level = 0
+ )) ORDER BY CASE
+ WHEN topics.category_id = 1 and (COALESCE(topics.pinned_at, '2010-01-01') > COALESCE(tu.cleared_pinned_at, '2010-01-01'))
+ THEN '3000-01-01'
+ ELSE topics.bumped_at
+ END DESC LIMIT 30
+  [1m[36mTopicUser Load (1.5ms)[0m  [1mSELECT "topic_users".* FROM "topic_users" WHERE "topic_users"."topic_id" IN (6) AND "topic_users"."user_id" = 1[0m
+  [1m[35mUser Load (1.4ms)[0m  SELECT id, email, username, use_uploaded_avatar, uploaded_avatar_template, uploaded_avatar_id FROM "users" WHERE "users"."id" IN (-1)
+  [1m[36mUserStat Load (1.1ms)[0m  [1mSELECT "user_stats".* FROM "user_stats" WHERE "user_stats"."user_id" = $1 ORDER BY "user_stats"."user_id" ASC LIMIT 1[0m  [["user_id", 1]]
+  [1m[35mPost Load (1.1ms)[0m  SELECT "posts".* FROM "posts" WHERE ("posts"."deleted_at" IS NULL) AND "posts"."topic_id" = $1 ORDER BY post_number ASC LIMIT 1  [["topic_id", 6]]
+Completed 200 OK in 32ms (Views: 0.0ms | ActiveRecord: 15.7ms)
+
+
+Started GET "/" for 10.0.2.2 at 2014-03-18 11:24:43 -0400
+  [1m[36mUser Load (1.2ms)[0m  [1mSELECT "users".* FROM "users" WHERE "users"."auth_token" = '830a22421a66df3c04a9cfb27810b61c' ORDER BY "users"."id" ASC LIMIT 1[0m
+Processing by ListController#latest as HTML
+  [1m[35m (1.1ms)[0m  SELECT "groups"."name" FROM "groups"
+  [1m[36m (1.2ms)[0m  [1mSELECT categories.id FROM "categories" INNER JOIN "category_groups" ON "categories"."id" = "category_groups"."category_id" INNER JOIN "groups" ON "category_groups"."group_id" = "groups"."id" INNER JOIN "group_users" ON "groups"."id" = "group_users"."group_id" WHERE "group_users"."user_id" = $1[0m  [["user_id", 1]]
+  [1m[35mCategory Load (1.1ms)[0m  SELECT "categories".* FROM "categories" WHERE (NOT categories.read_restricted) ORDER BY "categories"."position" ASC
+  [1m[36mTopic Load (1.3ms)[0m  [1mSELECT id, title, slug FROM "topics" WHERE ("topics"."deleted_at" IS NULL) AND "topics"."id" IN (2)[0m
+  [1m[35mGroup Load (1.1ms)[0m  SELECT "groups".* FROM "groups" WHERE "groups"."id" = 0 ORDER BY "groups"."id" ASC LIMIT 1
+  [1m[36m (1.3ms)[0m  [1mSELECT "categories"."id" FROM "categories" WHERE (categories.id in (
+ SELECT c.id FROM categories c
+ WHERE (
+ NOT c.read_restricted AND
+ (
+ NOT EXISTS(
+ SELECT 1 FROM category_groups cg WHERE cg.category_id = categories.id )
+ ) OR EXISTS(
+ SELECT 1 FROM category_groups cg
+ WHERE permission_type in (1) AND
+ cg.category_id = categories.id AND
+ group_id IN (
+ SELECT g.group_id FROM group_users g where g.user_id = 1 UNION SELECT 0
+ )
+ )
+ )
+ ))[0m
+  [1m[35mPostActionType Load (1.1ms)[0m  SELECT "post_action_types".* FROM "post_action_types" ORDER BY position asc
+  [1m[36mPostActionType Load (0.5ms)[0m  [1mSELECT "post_action_types".* FROM "post_action_types" WHERE "post_action_types"."name_key" IN ('inappropriate', 'spam', 'notify_moderators') ORDER BY position asc[0m
+  [1m[35mSiteContent Load (1.0ms)[0m  SELECT content FROM "site_contents" WHERE "site_contents"."content_type" = 'top' ORDER BY "site_contents"."content_type" ASC LIMIT 1
+  [1m[36mSiteContent Load (1.0ms)[0m  [1mSELECT content FROM "site_contents" WHERE "site_contents"."content_type" = 'bottom' ORDER BY "site_contents"."content_type" ASC LIMIT 1[0m
+  [1m[35m (1.1ms)[0m  SELECT COUNT(*) AS count_all, notification_type AS notification_type FROM "notifications" WHERE "notifications"."user_id" = $1 AND (id > 0 and read = false) GROUP BY notification_type  [["user_id", 1]]
+  [1m[36m (1.0ms)[0m  [1mSELECT COUNT(*) FROM "notifications" WHERE "notifications"."user_id" = $1 AND (read = false AND notification_type = 6)[0m  [["user_id", 1]]
+  [1m[35mUserStat Load (1.6ms)[0m  SELECT "user_stats".* FROM "user_stats" WHERE "user_stats"."user_id" = $1 ORDER BY "user_stats"."user_id" ASC LIMIT 1  [["user_id", 1]]
+  [1m[36m (1.0ms)[0m  [1mSELECT COUNT(*) FROM "topics" WHERE ("topics"."deleted_at" IS NULL) AND "topics"."user_id" = $1[0m  [["user_id", 1]]
+  [1m[35m (1.2ms)[0m  SELECT COUNT(*) FROM "posts" WHERE ("posts"."deleted_at" IS NULL) AND "posts"."user_id" = $1  [["user_id", 1]]
+  [1m[36m (1.3ms)[0m  [1mSELECT COUNT(*) FROM "topics" WHERE ("topics"."deleted_at" IS NULL) AND (topics.archetype <> 'private_message') AND "topics"."visible" = 't' AND (topics.id NOT IN (SELECT COALESCE(topic_id, 0) FROM categories))[0m
+  [1m[35mCACHE (0.0ms)[0m  SELECT COUNT(*) FROM "topics" WHERE ("topics"."deleted_at" IS NULL) AND (topics.archetype <> 'private_message') AND "topics"."visible" = 't' AND (topics.id NOT IN (SELECT COALESCE(topic_id, 0) FROM categories))
+  [1m[36m (1.9ms)[0m  [1m SELECT u.id AS user_id,
+ topics.id AS topic_id,
+ topics.created_at,
+ highest_post_number,
+ last_read_post_number,
+ c.name AS category_name,
+ tu.notification_level
+ FROM users u
+ INNER JOIN user_stats AS us ON us.user_id = u.id
+ FULL OUTER JOIN topics ON 1=1
+ LEFT JOIN topic_users tu ON tu.topic_id = topics.id AND tu.user_id = u.id
+ LEFT JOIN categories c ON c.id = topics.category_id
+ WHERE u.id IN (1) AND
+ topics.archetype <> 'private_message' AND
+ ((tu.last_read_post_number < topics.highest_post_number AND COALESCE(tu.notification_level, 1) >= 2) OR (topics.created_at >= GREATEST(CASE
+ WHEN COALESCE(u.new_topic_duration_minutes, 2880) = -1 THEN u.created_at
+ WHEN COALESCE(u.new_topic_duration_minutes, 2880) = -2 THEN COALESCE(u.previous_visit_at,u.created_at)
+ ELSE ('2014-03-18 15:24:53.132546'::timestamp - INTERVAL '1 MINUTE' * COALESCE(u.new_topic_duration_minutes, 2880))
+ END, us.new_since) AND tu.last_read_post_number IS NULL AND COALESCE(tu.notification_level, 2) >= 2)) AND
+ (topics.visible OR u.admin OR u.moderator) AND
+ topics.deleted_at IS NULL AND
+ ( category_id IS NULL OR NOT c.read_restricted OR category_id IN (
+ SELECT c2.id FROM categories c2
+ JOIN category_groups cg ON cg.category_id = c2.id
+ JOIN group_users gu ON gu.user_id = u.id AND cg.group_id = gu.group_id
+ WHERE c2.read_restricted )
+ )
+ AND NOT EXISTS( SELECT 1 FROM category_users cu
+ WHERE cu.user_id = u.id AND
+ cu.category_id = topics.category_id AND
+ cu.notification_level = 0)
+
+ ORDER BY topics.bumped_at DESC LIMIT 500[0m
+  [1m[35m (1.0ms)[0m  SELECT "categories"."id" FROM "categories" WHERE "categories"."read_restricted" = 'f'
+  [1m[36mCACHE (0.0ms)[0m  [1mSELECT categories.id FROM "categories" INNER JOIN "category_groups" ON "categories"."id" = "category_groups"."category_id" INNER JOIN "groups" ON "category_groups"."group_id" = "groups"."id" INNER JOIN "group_users" ON "groups"."id" = "group_users"."group_id" WHERE "group_users"."user_id" = $1[0m  [["user_id", 1]]
+  [1m[35m (0.7ms)[0m  select sequence from draft_sequences where user_id = 1 and draft_key = 'new_topic'
+  [1m[36mDraft Load (1.1ms)[0m  [1mSELECT "drafts".* FROM "drafts" WHERE "drafts"."user_id" = 1 AND "drafts"."draft_key" = 'new_topic' ORDER BY "drafts"."id" ASC LIMIT 1[0m
+  [1m[35m (1.1ms)[0m  SELECT SUM("posts"."spam_count") AS sum_id FROM "posts" WHERE ("posts"."deleted_at" IS NULL) AND "posts"."user_id" = 1
+  [1m[36mSQL (2.6ms)[0m  [1mSELECT "topics"."id" AS t0_r0, "topics"."title" AS t0_r1, "topics"."last_posted_at" AS t0_r2, "topics"."created_at" AS t0_r3, "topics"."updated_at" AS t0_r4, "topics"."views" AS t0_r5, "topics"."posts_count" AS t0_r6, "topics"."user_id" AS t0_r7, "topics"."last_post_user_id" AS t0_r8, "topics"."reply_count" AS t0_r9, "topics"."featured_user1_id" AS t0_r10, "topics"."featured_user2_id" AS t0_r11, "topics"."featured_user3_id" AS t0_r12, "topics"."avg_time" AS t0_r13, "topics"."deleted_at" AS t0_r14, "topics"."highest_post_number" AS t0_r15, "topics"."image_url" AS t0_r16, "topics"."off_topic_count" AS t0_r17, "topics"."like_count" AS t0_r18, "topics"."incoming_link_count" AS t0_r19, "topics"."bookmark_count" AS t0_r20, "topics"."star_count" AS t0_r21, "topics"."category_id" AS t0_r22, "topics"."visible" AS t0_r23, "topics"."moderator_posts_count" AS t0_r24, "topics"."closed" AS t0_r25, "topics"."archived" AS t0_r26, "topics"."bumped_at" AS t0_r27, "topics"."has_summary" AS t0_r28, "topics"."meta_data" AS t0_r29, "topics"."vote_count" AS t0_r30, "topics"."archetype" AS t0_r31, "topics"."featured_user4_id" AS t0_r32, "topics"."notify_moderators_count" AS t0_r33, "topics"."spam_count" AS t0_r34, "topics"."illegal_count" AS t0_r35, "topics"."inappropriate_count" AS t0_r36, "topics"."pinned_at" AS t0_r37, "topics"."score" AS t0_r38, "topics"."percent_rank" AS t0_r39, "topics"."notify_user_count" AS t0_r40, "topics"."subtype" AS t0_r41, "topics"."slug" AS t0_r42, "topics"."auto_close_at" AS t0_r43, "topics"."auto_close_user_id" AS t0_r44, "topics"."auto_close_started_at" AS t0_r45, "topics"."deleted_by_id" AS t0_r46, "topics"."participant_count" AS t0_r47, "topics"."word_count" AS t0_r48, "categories"."id" AS t1_r0, "categories"."name" AS t1_r1, "categories"."color" AS t1_r2, "categories"."topic_id" AS t1_r3, "categories"."topic_count" AS t1_r4, "categories"."created_at" AS t1_r5, "categories"."updated_at" AS t1_r6, "categories"."user_id" AS t1_r7, "categories"."topics_year" AS t1_r8, "categories"."topics_month" AS t1_r9, "categories"."topics_week" AS t1_r10, "categories"."slug" AS t1_r11, "categories"."description" AS t1_r12, "categories"."text_color" AS t1_r13, "categories"."read_restricted" AS t1_r14, "categories"."auto_close_hours" AS t1_r15, "categories"."post_count" AS t1_r16, "categories"."latest_post_id" AS t1_r17, "categories"."latest_topic_id" AS t1_r18, "categories"."position" AS t1_r19, "categories"."parent_category_id" AS t1_r20, "categories"."posts_year" AS t1_r21, "categories"."posts_month" AS t1_r22, "categories"."posts_week" AS t1_r23, "categories"."email_in" AS t1_r24, "categories"."email_in_allow_strangers" AS t1_r25, "topic_only_relative_urls_categories"."id" AS t2_r0, "topic_only_relative_urls_categories"."title" AS t2_r1, "topic_only_relative_urls_categories"."last_posted_at" AS t2_r2, "topic_only_relative_urls_categories"."created_at" AS t2_r3, "topic_only_relative_urls_categories"."updated_at" AS t2_r4, "topic_only_relative_urls_categories"."views" AS t2_r5, "topic_only_relative_urls_categories"."posts_count" AS t2_r6, "topic_only_relative_urls_categories"."user_id" AS t2_r7, "topic_only_relative_urls_categories"."last_post_user_id" AS t2_r8, "topic_only_relative_urls_categories"."reply_count" AS t2_r9, "topic_only_relative_urls_categories"."featured_user1_id" AS t2_r10, "topic_only_relative_urls_categories"."featured_user2_id" AS t2_r11, "topic_only_relative_urls_categories"."featured_user3_id" AS t2_r12, "topic_only_relative_urls_categories"."avg_time" AS t2_r13, "topic_only_relative_urls_categories"."deleted_at" AS t2_r14, "topic_only_relative_urls_categories"."highest_post_number" AS t2_r15, "topic_only_relative_urls_categories"."image_url" AS t2_r16, "topic_only_relative_urls_categories"."off_topic_count" AS t2_r17, "topic_only_relative_urls_categories"."like_count" AS t2_r18, "topic_only_relative_urls_categories"."incoming_link_count" AS t2_r19, "topic_only_relative_urls_categories"."bookmark_count" AS t2_r20, "topic_only_relative_urls_categories"."star_count" AS t2_r21, "topic_only_relative_urls_categories"."category_id" AS t2_r22, "topic_only_relative_urls_categories"."visible" AS t2_r23, "topic_only_relative_urls_categories"."moderator_posts_count" AS t2_r24, "topic_only_relative_urls_categories"."closed" AS t2_r25, "topic_only_relative_urls_categories"."archived" AS t2_r26, "topic_only_relative_urls_categories"."bumped_at" AS t2_r27, "topic_only_relative_urls_categories"."has_summary" AS t2_r28, "topic_only_relative_urls_categories"."meta_data" AS t2_r29, "topic_only_relative_urls_categories"."vote_count" AS t2_r30, "topic_only_relative_urls_categories"."archetype" AS t2_r31, "topic_only_relative_urls_categories"."featured_user4_id" AS t2_r32, "topic_only_relative_urls_categories"."notify_moderators_count" AS t2_r33, "topic_only_relative_urls_categories"."spam_count" AS t2_r34, "topic_only_relative_urls_categories"."illegal_count" AS t2_r35, "topic_only_relative_urls_categories"."inappropriate_count" AS t2_r36, "topic_only_relative_urls_categories"."pinned_at" AS t2_r37, "topic_only_relative_urls_categories"."score" AS t2_r38, "topic_only_relative_urls_categories"."percent_rank" AS t2_r39, "topic_only_relative_urls_categories"."notify_user_count" AS t2_r40, "topic_only_relative_urls_categories"."subtype" AS t2_r41, "topic_only_relative_urls_categories"."slug" AS t2_r42, "topic_only_relative_urls_categories"."auto_close_at" AS t2_r43, "topic_only_relative_urls_categories"."auto_close_user_id" AS t2_r44, "topic_only_relative_urls_categories"."auto_close_started_at" AS t2_r45, "topic_only_relative_urls_categories"."deleted_by_id" AS t2_r46, "topic_only_relative_urls_categories"."participant_count" AS t2_r47, "topic_only_relative_urls_categories"."word_count" AS t2_r48 FROM "topics" LEFT OUTER JOIN "categories" ON "categories"."id" = "topics"."category_id" LEFT OUTER JOIN "topics" "topic_only_relative_urls_categories" ON "topic_only_relative_urls_categories"."id" = "categories"."topic_id" AND ("topics"."deleted_at" IS NULL) LEFT OUTER JOIN topic_users AS tu ON (topics.id = tu.topic_id AND tu.user_id = 1) WHERE ("topics"."deleted_at" IS NULL) AND (topics.archetype <> 'private_message') AND (COALESCE(categories.topic_id, 0) <> topics.id) AND "topics"."visible" = 't' AND (topics.category_id IS NULL or topics.category_id IN (3,1)) AND (NOT EXISTS(
+ SELECT 1 FROM category_users cu
+ WHERE cu.user_id = 1 AND
+ cu.category_id = topics.category_id AND
+ cu.notification_level = 0
+ )) ORDER BY CASE
+ WHEN topics.category_id = 1 and (COALESCE(topics.pinned_at, '2010-01-01') > COALESCE(tu.cleared_pinned_at, '2010-01-01'))
+ THEN '3000-01-01'
+ ELSE topics.bumped_at
+ END DESC LIMIT 30[0m
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: Error fetching message: Error connecting to Redis on localhost:6379 (ECONNREFUSED)
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:290:in `rescue in establish_connection'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:285:in `establish_connection'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:79:in `block in connect'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:257:in `with_reconnect'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:78:in `connect'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:304:in `ensure_connected'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:191:in `block in process'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:270:in `logging'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:190:in `process'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:96:in `call'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:179:in `block in call_with_timeout'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:244:in `with_socket_timeout'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:178:in `call_with_timeout'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1038:in `block in _bpop'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `block in synchronize'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/rubies/ruby-2.0.0-p0-turbo/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `synchronize'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1035:in `_bpop'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1080:in `brpop'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-namespace-1.4.1/lib/redis/namespace.rb:352:in `method_missing'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/fetch.rb:101:in `block in retrieve_work'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/connection_pool-1.2.0/lib/connection_pool.rb:55:in `with'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq.rb:67:in `redis'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/fetch.rb:101:in `retrieve_work'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/fetch.rb:36:in `block in fetch'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/util.rb:15:in `watchdog'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/fetch.rb:32:in `fetch'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/fetch.rb:43:in `block (2 levels) in fetch'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/celluloid-0.15.2/lib/celluloid/actor.rb:416:in `block in task'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/celluloid-0.15.2/lib/celluloid/tasks.rb:55:in `block in initialize'
+2014-03-18T15:27:19Z 4781 TID-1jkr9o ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/celluloid-0.15.2/lib/celluloid/tasks/task_fiber.rb:13:in `block in create'
+FATAL:  terminating connection due to administrator command
+2014-03-18T15:27:20Z 4781 TID-1i6pq4 WARN: {:current_db=>"default", :current_hostname=>"localhost"}
+2014-03-18T15:27:20Z 4781 TID-1i6pq4 WARN: Error connecting to Redis on localhost:6379 (ECONNREFUSED)
+2014-03-18T15:27:20Z 4781 TID-1i6pq4 WARN: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:290:in `rescue in establish_connection'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:285:in `establish_connection'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:79:in `block in connect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:257:in `with_reconnect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:78:in `connect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:304:in `ensure_connected'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:191:in `block in process'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:270:in `logging'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:190:in `process'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:96:in `call'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:416:in `block in del'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `block in synchronize'
+/usr/local/rvm/rubies/ruby-2.0.0-p0-turbo/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `synchronize'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:415:in `del'
+/vagrant/lib/discourse_redis.rb:63:in `del'
+/vagrant/lib/scheduler/manager.rb:249:in `ensure in lock'
+/vagrant/lib/scheduler/manager.rb:249:in `lock'
+/vagrant/lib/scheduler/manager.rb:182:in `tick'
+/vagrant/config/initializers/sidekiq.rb:35:in `block in <top (required)>'
+2014-03-18T15:27:21Z 4781 TID-1j8p8e WARN: Unable to clear worker set while shutting down: Error connecting to Redis on localhost:6379 (ECONNREFUSED)
+  [1m[35mTopicUser Load (1.1ms)[0m  SELECT "topic_users".* FROM "topic_users" WHERE "topic_users"."topic_id" IN (6) AND "topic_users"."user_id" = 1
+  [1m[36mUser Load (1.1ms)[0m  [1mSELECT id, email, username, use_uploaded_avatar, uploaded_avatar_template, uploaded_avatar_id FROM "users" WHERE "users"."id" IN (-1)[0m
+  [1m[35mPost Load (1.3ms)[0m  SELECT "posts".* FROM "posts" WHERE ("posts"."deleted_at" IS NULL) AND "posts"."topic_id" = $1 ORDER BY post_number ASC LIMIT 1  [["topic_id", 6]]
+  Rendered list/list.erb within layouts/application (1.1ms)
+  Rendered common/_special_font_face.html.erb (31.0ms)
+  Rendered common/_discourse_stylesheet.html.erb (1753.5ms)
+  [1m[36mSiteContent Load (1.5ms)[0m  [1mSELECT content FROM "site_contents" WHERE "site_contents"."content_type" = 'head' ORDER BY "site_contents"."content_type" ASC LIMIT 1[0m
+  Rendered common/_discourse_javascript.html.erb (67.5ms)
+Completed 200 OK in 15056ms (Views: 14990.6ms | ActiveRecord: 31.0ms)
+Error connecting to Redis on localhost:6379 (ECONNREFUSED) subscribe failed, reconnecting in 1 second. Call stack ["/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:290:in `rescue in establish_connection'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:285:in `establish_connection'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:79:in `block in connect'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:257:in `with_reconnect'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:78:in `connect'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:304:in `ensure_connected'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:191:in `block in process'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:270:in `logging'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:190:in `process'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:110:in `block in call_loop'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:244:in `with_socket_timeout'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:251:in `without_socket_timeout'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:109:in `call_loop'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/subscribe.rb:35:in `subscription'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/subscribe.rb:12:in `subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:2498:in `_subscription'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1955:in `block in subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `block in synchronize'", "/usr/local/rvm/rubies/ruby-2.0.0-p0-turbo/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `synchronize'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1954:in `subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/message_bus-0.9.4/lib/message_bus/reliable_pub_sub.rb:247:in `global_subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/message_bus-0.9.4/lib/message_bus.rb:370:in `global_subscribe_thread'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/message_bus-0.9.4/lib/message_bus.rb:365:in `block in new_subscriber_thread'"]
+PG::Error: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+: SELECT  "users".* FROM "users"  WHERE "users"."auth_token" = '830a22421a66df3c04a9cfb27810b61c'  ORDER BY "users"."id" ASC LIMIT 1
+
+PG::Error (result has been cleared):
+  lib/auth/default_current_user_provider.rb:27:in `current_user'
+  lib/current_user.rb:8:in `lookup_from_env'
+  config/initializers/04-message_bus.rb:6:in `block in <top (required)>'
+  config/initializers/silence_logger.rb:16:in `call'
+  lib/middleware/missing_avatars.rb:21:in `call'
+  lib/middleware/turbo_dev.rb:32:in `call'
+
+
+Error connecting to Redis on localhost:6379 (ECONNREFUSED) subscribe failed, reconnecting in 1 second. Call stack ["/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:290:in `rescue in establish_connection'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:285:in `establish_connection'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:79:in `block in connect'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:257:in `with_reconnect'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:78:in `connect'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:240:in `with_socket_timeout'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:251:in `without_socket_timeout'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:109:in `call_loop'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/subscribe.rb:35:in `subscription'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/subscribe.rb:12:in `subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:2498:in `_subscription'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1955:in `block in subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `block in synchronize'", "/usr/local/rvm/rubies/ruby-2.0.0-p0-turbo/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `synchronize'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1954:in `subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/message_bus-0.9.4/lib/message_bus/reliable_pub_sub.rb:247:in `global_subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/message_bus-0.9.4/lib/message_bus.rb:370:in `global_subscribe_thread'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/message_bus-0.9.4/lib/message_bus.rb:365:in `block in new_subscriber_thread'"]
+Error connecting to Redis on localhost:6379 (ECONNREFUSED) subscribe failed, reconnecting in 1 second. Call stack ["/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:290:in `rescue in establish_connection'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:285:in `establish_connection'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:79:in `block in connect'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:257:in `with_reconnect'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:78:in `connect'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:240:in `with_socket_timeout'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:251:in `without_socket_timeout'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:109:in `call_loop'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/subscribe.rb:35:in `subscription'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/subscribe.rb:12:in `subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:2498:in `_subscription'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1955:in `block in subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `block in synchronize'", "/usr/local/rvm/rubies/ruby-2.0.0-p0-turbo/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `synchronize'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1954:in `subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/message_bus-0.9.4/lib/message_bus/reliable_pub_sub.rb:247:in `global_subscribe'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/message_bus-0.9.4/lib/message_bus.rb:370:in `global_subscribe_thread'", "/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/message_bus-0.9.4/lib/message_bus.rb:365:in `block in new_subscriber_thread'"]
+FATAL:  terminating connection due to administrator command
+PG::Error: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+: SELECT  "users".* FROM "users"  WHERE "users"."auth_token" = '830a22421a66df3c04a9cfb27810b61c'  ORDER BY "users"."id" ASC LIMIT 1
+
+PG::Error (result has been cleared):
+  lib/auth/default_current_user_provider.rb:27:in `current_user'
+  lib/current_user.rb:8:in `lookup_from_env'
+  config/initializers/04-message_bus.rb:6:in `block in <top (required)>'
+  config/initializers/silence_logger.rb:16:in `call'
+  lib/middleware/missing_avatars.rb:21:in `call'
+  lib/middleware/turbo_dev.rb:32:in `call'
+
+
+Waiting for 3 connection(s) to finish, can take up to 30 sec, CTRL+C to stop now
+Exiting
+Usage: rails COMMAND [ARGS]
+
+The most common rails commands are:
+ generate    Generate new code (short-cut alias: "g")
+ console     Start the Rails console (short-cut alias: "c")
+ server      Start the Rails server (short-cut alias: "s")
+ dbconsole   Start a console for the database specified in config/database.yml
+             (short-cut alias: "db")
+ new         Create a new Rails application. "rails new my_app" creates a
+             new application called MyApp in "./my_app"
+
+In addition to those, there are:
+ application  Generate the Rails application code
+ destroy      Undo code generated with "generate" (short-cut alias: "d")
+ plugin new   Generates skeleton for developing a Rails plugin
+ runner       Run a piece of code in the application environment (short-cut alias: "r")
+
+All commands can be run with -h (or --help) for more information.
+[deprecated] I18n.enforce_available_locales will default to true in the future. If you really want to skip validation of your locale you can set I18n.enforce_available_locales = false to avoid this message.
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: Error fetching message: Error connecting to Redis on localhost:6379 (ECONNREFUSED)
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:290:in `rescue in establish_connection'
+2014-03-18T16:00:44Z 3018 TID-1st0zm WARN: {:current_db=>"default", :current_hostname=>"localhost"}
+2014-03-18T16:00:44Z 3018 TID-1st0zm WARN: Error connecting to Redis on localhost:6379 (ECONNREFUSED)
+2014-03-18T16:00:44Z 3018 TID-1st0zm WARN: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:290:in `rescue in establish_connection'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:285:in `establish_connection'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:79:in `block in connect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:257:in `with_reconnect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:78:in `connect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:304:in `ensure_connected'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:191:in `block in process'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:270:in `logging'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:190:in `process'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:96:in `call'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:691:in `block in setex'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `block in synchronize'
+/usr/local/rvm/rubies/ruby-2.0.0-p0-turbo/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `synchronize'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:690:in `setex'
+/vagrant/lib/discourse_redis.rb:57:in `block (2 levels) in <class:DiscourseRedis>'
+/vagrant/lib/scheduler/manager.rb:219:in `keep_alive'
+/vagrant/lib/scheduler/manager.rb:41:in `keep_alive'
+/vagrant/lib/scheduler/manager.rb:28:in `block (2 levels) in initialize'
+/vagrant/lib/scheduler/manager.rb:27:in `synchronize'
+/vagrant/lib/scheduler/manager.rb:27:in `block in initialize'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:285:in `establish_connection'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:79:in `block in connect'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:257:in `with_reconnect'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:78:in `connect'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:304:in `ensure_connected'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:191:in `block in process'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:270:in `logging'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:190:in `process'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:96:in `call'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:179:in `block in call_with_timeout'
+2014-03-18T16:00:44Z 3018 TID-1stx3q WARN: {:current_db=>"default", :current_hostname=>"localhost"}
+2014-03-18T16:00:44Z 3018 TID-1stx3q WARN: Error connecting to Redis on localhost:6379 (ECONNREFUSED)
+2014-03-18T16:00:44Z 3018 TID-1stx3q WARN: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:290:in `rescue in establish_connection'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:285:in `establish_connection'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:79:in `block in connect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:257:in `with_reconnect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:78:in `connect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:304:in `ensure_connected'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:191:in `block in process'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:270:in `logging'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:190:in `process'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:96:in `call'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:416:in `block in del'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `block in synchronize'
+/usr/local/rvm/rubies/ruby-2.0.0-p0-turbo/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `synchronize'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:415:in `del'
+/vagrant/lib/discourse_redis.rb:63:in `del'
+/vagrant/lib/scheduler/manager.rb:249:in `ensure in lock'
+/vagrant/lib/scheduler/manager.rb:249:in `lock'
+/vagrant/lib/scheduler/manager.rb:182:in `tick'
+/vagrant/config/initializers/sidekiq.rb:35:in `block in <top (required)>'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:244:in `with_socket_timeout'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:178:in `call_with_timeout'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1038:in `block in _bpop'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `block in synchronize'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/rubies/ruby-2.0.0-p0-turbo/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `synchronize'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1035:in `_bpop'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:1080:in `brpop'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-namespace-1.4.1/lib/redis/namespace.rb:352:in `method_missing'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/fetch.rb:101:in `block in retrieve_work'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/connection_pool-1.2.0/lib/connection_pool.rb:55:in `with'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq.rb:67:in `redis'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/fetch.rb:101:in `retrieve_work'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/fetch.rb:36:in `block in fetch'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/util.rb:15:in `watchdog'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/fetch.rb:32:in `fetch'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/sidekiq-2.17.6/lib/sidekiq/fetch.rb:43:in `block (2 levels) in fetch'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/celluloid-0.15.2/lib/celluloid/actor.rb:416:in `block in task'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/celluloid-0.15.2/lib/celluloid/tasks.rb:55:in `block in initialize'
+2014-03-18T16:00:44Z 3018 TID-1dp2ja ERROR: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/celluloid-0.15.2/lib/celluloid/tasks/task_fiber.rb:13:in `block in create'
+2014-03-18T16:00:45Z 3018 TID-1stx3q WARN: {:current_db=>"default", :current_hostname=>"localhost"}
+2014-03-18T16:00:45Z 3018 TID-1stx3q WARN: Error connecting to Redis on localhost:6379 (ECONNREFUSED)
+2014-03-18T16:00:45Z 3018 TID-1stx3q WARN: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:290:in `rescue in establish_connection'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:285:in `establish_connection'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:79:in `block in connect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:257:in `with_reconnect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:78:in `connect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:304:in `ensure_connected'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:191:in `block in process'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:270:in `logging'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:190:in `process'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:96:in `call'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:416:in `block in del'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `block in synchronize'
+/usr/local/rvm/rubies/ruby-2.0.0-p0-turbo/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `synchronize'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:415:in `del'
+/vagrant/lib/discourse_redis.rb:63:in `del'
+/vagrant/lib/scheduler/manager.rb:249:in `ensure in lock'
+/vagrant/lib/scheduler/manager.rb:249:in `lock'
+/vagrant/lib/scheduler/manager.rb:182:in `tick'
+/vagrant/config/initializers/sidekiq.rb:35:in `block in <top (required)>'
+2014-03-18T16:00:47Z 3018 TID-1stx3q WARN: {:current_db=>"default", :current_hostname=>"localhost"}
+2014-03-18T16:00:47Z 3018 TID-1stx3q WARN: Error connecting to Redis on localhost:6379 (ECONNREFUSED)
+2014-03-18T16:00:47Z 3018 TID-1stx3q WARN: /usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:290:in `rescue in establish_connection'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:285:in `establish_connection'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:79:in `block in connect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:257:in `with_reconnect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:78:in `connect'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:304:in `ensure_connected'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:191:in `block in process'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:270:in `logging'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:190:in `process'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis/client.rb:96:in `call'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:416:in `block in del'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `block in synchronize'
+/usr/local/rvm/rubies/ruby-2.0.0-p0-turbo/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:37:in `synchronize'
+/usr/local/rvm/gems/ruby-2.0.0-p0-turbo/gems/redis-3.0.7/lib/redis.rb:415:in `del'
+/vagrant/lib/discourse_redis.rb:63:in `del'
+/vagrant/lib/scheduler/manager.rb:249:in `ensure in lock'
+/vagrant/lib/scheduler/manager.rb:249:in `lock'
+/vagrant/lib/scheduler/manager.rb:182:in `tick'
+/vagrant/config/initializers/sidekiq.rb:35:in `block in <top (required)>'
+2014-03-18T16:00:47Z 3018 TID-1tdicm WARN: Unable to clear worker set while shutting down: Error connecting to Redis on localhost:6379 (ECONNREFUSED)

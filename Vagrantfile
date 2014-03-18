@@ -17,13 +17,14 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider :virtualbox do |v|
     # This setting gives the VM 1024MB of RAM instead of the default 384.
-    v.customize ["modifyvm", :id, "--memory", [ENV['DISCOURSE_VM_MEM'].to_i, 2048].max]
+    v.customize ["modifyvm", :id, "--memory", [ENV['DISCOURSE_VM_MEM'].to_i, 1024].max]
 
     # This setting makes it so that network access from inside the vagrant guest
     # is able to resolve DNS using the hosts VPN connection.
     v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 	
-	v.cpus = 4
+	v.customize ["modifyvm", :id, "--cpuexecutioncap", "100"]
+    v.cpus = 2
   end
 
   config.vm.network :forwarded_port, guest: 3000, host: 4000

@@ -81,13 +81,14 @@ Discourse.NavItem.reopenClass({
   },
 
   buildList: function(category, args) {
+
     args = args || {};
     if (category) { args.category = category }
 
     return Discourse.SiteSettings.top_menu.split("|").map(function(i) {
       return Discourse.NavItem.fromText(i, args);
     }).filter(function(i) {
-      return i !== null && !(category && i.get("name").indexOf("categor") === 0);
+      return i !== null;
     });
   }
 
