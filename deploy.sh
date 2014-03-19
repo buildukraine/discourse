@@ -6,7 +6,7 @@ sudo cp -f -R ~/discourse/app/assets/stylesheets/* ~/apps/discourse/htdocs/app/a
 sudo cp -f -R ~/discourse/app/views/layouts/* ~/apps/discourse/htdocs/app/views/layouts
 
 cd ~/apps/discourse/htdocs
-sudo RUBY_GC_MALLOC_LIMIT=90000000 RAILS_ENV=production bundle exec exec rake tmp:clear
+sudo RUBY_GC_MALLOC_LIMIT=90000000 RAILS_ENV=production bundle exec rake tmp:clear
 sudo RUBY_GC_MALLOC_LIMIT=90000000 RAILS_ENV=production bundle exec rake assets:precompile
 sudo chmod -R 777 ~/apps/discourse/htdocs
 sudo /opt/bitnami/ctlscript.sh restart
