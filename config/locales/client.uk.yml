@@ -1198,6 +1198,10 @@ uk:
       share: 
         help: "Поділитися лінком на ідею"
         title: Поділитися
+      flag_topic:
+        title: 'Flag'
+        help: 'privately flag this topic for attention or send a private notification about it'
+        success_message: 'You successfully flagged this topic.'
       show_links: "показати посилання в ідеї"
       split_topic: 
         action: "перемістити до нової ідеї"
