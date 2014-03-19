@@ -1450,6 +1450,12 @@ uk:
       title: 
         title: Заголовок
       trust_level: "Рівень довіри"
+      watched_categories: "Відслідковувані"
+    watched_categories_instructions: "You will automatically watch all new topics in these categories. You will be notified of all new posts and topics, plus the count of unread and new posts will also appear next to the topic's listing."
+    tracked_categories: "Відстежувані"
+    tracked_categories_instructions: "Ви будете автоматично відстежувати всі нові теми у цих категоріях. Число непрочитаних та нових дописів з'являтиметься навпроти теми."
+    muted_categories: "Ігноровані"
+    muted_categories_instructions: "Ви не будете отримувати жодних сповіщень про нові теми у цих категоріях, і вони не з'являтимуться у вкладці Непрочитані."
       unread_message: "Непрочитані повідомлення"
       unread_message_count: 
         few: "Повідомлення ({{count}})"
