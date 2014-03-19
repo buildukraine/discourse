@@ -1389,6 +1389,12 @@ uk:
         all: Всі
         mine: Мої
         unread: Непрочитані
+      change_password:
+        success: "(лист надіслано)"
+        in_progress: "(надсилання листа)"
+        error: "(помилка)"
+        action: "Надіслати лист для відновлення паролю"
+        set_password: "Встановити пароль"
       moderator: "{{user}} - модератор"
       mute: Вимкнути
       name: 
@@ -1499,6 +1505,7 @@ uk:
     users: Користувачі
     views: Ознайомились
     views_long: "ідею переглянули {{number}} разів"
+    mailing_list_mode: "Отримуйте пошту кожного разу як додається новий пост."
     watched_categories: "Категорії, що переглядаються"
     watched_categories_instructions: "Додайте сюди категорії, які бажаєте постійно переглядати."
     week: тиждень
