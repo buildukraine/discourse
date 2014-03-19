@@ -697,7 +697,7 @@ uk:
     likes: Підтримують
     likes_long: "{{number}} лайків у ідеї"
     links: Посилання
-    loading: "Завантаження"
+    loading: Завантаження
     log_in: Увійти
     login: 
       authenticating: Перевірка...
@@ -1329,7 +1329,11 @@ uk:
         taken: "Ім'я користувача вже зайнято."
         title: "Змінити ім'я користувача"
       created: Реєстрація
+      delete_account: "Delete My Account"
+      delete_account_confirm: "Are you sure you want to permanently delete your account? This action cannot be undone!"
+      delete_yourself_not_allowed: "You cannot delete your account right now. Contact an admin to do delete your account for you."
       deleted: (видалений)
+      deleted_yourself: "Your account has been deleted successfully."
       download_archive: "завантажити архів ваших повідомлень"
       dynamic_favicon: "Відображати події на favicon"
       edit: Налаштування
@@ -1427,6 +1431,13 @@ uk:
       title: 
         title: Заголовок
       trust_level: "Рівень довіри"
+      unread_message: "Непрочитані повідомлення"
+      unread_message_count: 
+        few: "Повідомлення ({{count}})"
+        many: "Повідомлень ({{count}})"
+        one: "Повідомлення (1)"
+        other: "Повідомлень ({{count}})"
+        zero: Повідомлень
       username: 
         available: "Ім'я користувача доступно."
         checking: "Перевіряю доступність імені користувача..."
