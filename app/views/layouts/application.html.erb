@@ -37,6 +37,16 @@
         function navigateForum() {
             window.location.href = "http://forum." + window.location.host;
         }
+	
+	$document.ready(function() {
+	  var docHeight = $(window).height();
+	  var footerHeight = $('#footer-wrapper').height();
+	  var footerTop = $('#footer-wrapper').position().top + footerHeight;
+	  
+	  if (footerTop < docHeight) {
+	    $('#footer-wrapper').css('margin-top', 10 + (docHeight - footerTop) + 'px')
+	  }
+	});
     </script>
 	
     <%= yield :head %>
@@ -48,11 +58,11 @@
 	  <a href="/"><img id="logo" src="/assets/logo.png"></a>
 		<div id="main-menu-wrapper">
 			<ul id="main-menu">
-				<li><a href="/">Головна</a></li>
-				<li><a href="http://buildukraine.com/advice">Поради</a></li>
-				<li><a href="http://buildukraine.com/">Як це працює?</a></li>
-				<li><a href="http://blog.buildukraine.com/">Блог</a></li>
-				<li><a href="http://buildukraine.com/about">Про нас</a></li>
+				<a href="/" id="active-link"><li>Головна</li></a>
+				<a href="http://buildukraine.com/advice"><li>Поради</li></a>
+				<a href="http://buildukraine.com/"><li>Як це працює?</li></a>
+				<a href="http://blog.buildukraine.com/"><li>Блог</li></a>
+				<a href="http://buildukraine.com/about"><li>Про нас</li></a>
 			</ul>
 			<ul id="main-menu-social">
 				<a href='https://www.facebook.com/buildukraine'><li id="facebook-page"></li></a>
@@ -112,26 +122,26 @@
 
     <footer id='bottom'></footer>
 
-<!--<div id="footer-wrapper">
+<div id="footer-wrapper">
 	<footer id="footer-start">
-		<img id="logo" src="assets/footer-logo.png">
+		<img id="logo" src="/assets/footer-logo.png">
 		<div id="main-menu-wrapper">
 			<ul id="main-menu">
-				<li><a href="">Форум</a></li>
-				<li><a href="">Поради</a></li>
-				<li><a href="">Як це працює</a></li>
-				<li><a href="">Блог</a></li>
-				<li><a href="">Про нас</a></li>
-			</ul>
+					<li><a href="/" id="active-link">Головна</a></li>
+					<li><a href="http://buildukraine.com/advice">Поради</a></li>
+					<li><a href="http://buildukraine.com/">Як це працює?</a></li>
+					<li><a href="http://blog.buildukraine.com/">Блог</a></li>
+					<li><a href="http://buildukraine.com/about">Про нас</a></li>
+				</ul>
 			<ul id="main-menu-social">
-				<li id="facebook-page"></li>
-				<li id="vkontakte-page"></li>
+				<a href='https://www.facebook.com/buildukraine'><li id="facebook-page"></li></a>
+				<!-- <li id="vkontakte-page"></li>
 				<li id="twitter-page"></li>
-				<li id="odnoklassniki-page"></li>
+				<li id="odnoklassniki-page"></li> -->
 			</ul>
 		</div>
 	</footer>
-	</div>-->
+	</div>
 
     <%= render :partial => "common/discourse_javascript" %>
 
