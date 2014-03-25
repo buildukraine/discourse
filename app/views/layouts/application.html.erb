@@ -34,17 +34,22 @@
     <%= render_google_universal_analytics_code %>
 
 	<script type="text/javascript">
-        function navigateForum() {
-            window.location.href = "http://forum." + window.location.host;
-        }
 	
 	$(document).ready(function() {
-	  var docHeight = $(window).height();
+	  
+	  var docHeight = $('body').height();
+	  var windowHeight = $(window).height();
+	  
+	  var targetHeight = docHeight;
+	  if (windowHeight > docHeight) {
+	    targetHeight = windowHeight;
+	  }
+	  
 	  var footerHeight = $('#footer-wrapper').height();
 	  var footerTop = $('#footer-wrapper').position().top + footerHeight;
 	  
-	  if (footerTop < docHeight) {
-	    $('#footer-wrapper').css('margin-top', 10 + (docHeight - footerTop) + 'px')
+	  if (footerTop < targetHeight) {
+	    $('#footer-wrapper').css('margin-top', (targetHeight - footerTop) + 'px')
 	  }
 	});
     </script>
