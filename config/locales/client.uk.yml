@@ -614,6 +614,8 @@ uk:
       hot: 
         help: "Підбірка популярних ідей"
         title: Популярні
+      with_topics: "%{filter} ідеї"
+      with_category: "%{filter} ідеї в категорії %{category}"
       latest: 
         help: "Усі ідеї"
         title: "Усі ідеї"
