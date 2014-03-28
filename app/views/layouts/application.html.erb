@@ -35,8 +35,7 @@
 
 	<script type="text/javascript">
 	
-	function updateFooter(){
-	  $('#footer-wrapper').hide();
+	$(document).ready(function() {
 	  
 	  var docHeight = $('body').height();
 	  var windowHeight = $(window).height();
@@ -47,21 +46,14 @@
 	  }
 	  
 	  var footerHeight = $('#footer-wrapper').height();
-	  var footerTop = $('#main-outlet').height();
+	  var footerTop = $('#footer-wrapper').position().top + footerHeight;
 	  
 	  if (footerTop < targetHeight) {
 	    $('#footer-wrapper').css('margin-top', (targetHeight - footerTop) + 'px')
 	  }
 	  
 	  $('#footer-wrapper').show();
-	}
-	
-	updateFooter();
-	
-	$(document).ready(function() {
-	  updateFooter();
 	});
-	
     </script>
 	
     <%= yield :head %>
@@ -69,7 +61,7 @@
 
   <body>
 
-	<header class="main-header" style="position: absolute; top: -1000px;">
+	<header class="main-header">
 	  <a href="/"><img id="logo" src="/assets/logo.png"></a>
 		<div id="main-menu-wrapper">
 			<ul id="main-menu">
