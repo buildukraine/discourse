@@ -51,6 +51,8 @@
 	  if (footerTop < targetHeight) {
 	    $('#footer-wrapper').css('margin-top', (targetHeight - footerTop) + 'px')
 	  }
+	  
+	  $('#footer-wrapper').show();
 	});
     </script>
 	
@@ -63,7 +65,7 @@
 	  <a href="/"><img id="logo" src="/assets/logo.png"></a>
 		<div id="main-menu-wrapper">
 			<ul id="main-menu">
-				<a href="/" id="active-link"><li>Головна</li></a>
+				<a href="/"><li id="active-link">Головна</li></a>
 				<a href="http://buildukraine.com/advice"><li>Поради</li></a>
 				<a href="http://buildukraine.com/"><li>Як це працює?</li></a>
 				<a href="http://blog.buildukraine.com/"><li>Блог</li></a>
@@ -127,16 +129,16 @@
 
     <footer id='bottom'></footer>
 
-<div id="footer-wrapper">
+<div id="footer-wrapper" style="display: none;">
 	<footer id="footer-start">
 		<img id="logo" src="/assets/footer-logo.png">
 		<div id="main-menu-wrapper">
 			<ul id="main-menu">
-					<li><a href="/" id="active-link">Головна</a></li>
-					<li><a href="http://buildukraine.com/advice">Поради</a></li>
-					<li><a href="http://buildukraine.com/">Як це працює?</a></li>
-					<li><a href="http://blog.buildukraine.com/">Блог</a></li>
-					<li><a href="http://buildukraine.com/about">Про нас</a></li>
+				<a href="/"><li id="active-link">Головна</li></a>
+				<a href="http://buildukraine.com/advice"><li>Поради</li></a>
+				<a href="http://buildukraine.com/"><li>Як це працює?</li></a>
+				<a href="http://blog.buildukraine.com/"><li>Блог</li></a>
+				<a href="http://buildukraine.com/about"><li>Про нас</li></a>
 				</ul>
 			<ul id="main-menu-social">
 				<a href='https://www.facebook.com/buildukraine'><li id="facebook-page"></li></a>
