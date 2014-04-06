@@ -1,10 +1,9 @@
 cd ~/discourse
-sudo cp -f -R ~/discourse/config/locales/client.uk.yml ~/apps/discourse/htdocs/config/locales/client.uk.yml
-sudo cp -f -R ~/discourse/config/locales/server.uk.yml ~/apps/discourse/htdocs/config/locales/server.uk.yml
-sudo cp -f -R ~/discourse/app/assets/javascripts/discourse/models/* ~/apps/discourse/htdocs/app/assets/javascripts/discourse/models
-sudo cp -f -R ~/discourse/app/assets/stylesheets/* ~/apps/discourse/htdocs/app/assets/stylesheets
-sudo cp -f -R ~/discourse/app/assets/javascripts/* ~/apps/discourse/htdocs/app/assets/javascripts
-sudo cp -f -R ~/discourse/app/views/layouts/* ~/apps/discourse/htdocs/app/views/layouts
+
+sudo cp -f -R ~/discourse/app/* ~/apps/discourse/htdocs/app
+sudo cp -f -R ~/discourse/lib/* ~/apps/discourse/htdocs/lib
+sudo cp -f -R ~/discourse/spec/* ~/apps/discourse/htdocs/spec
+sudo cp -f -R ~/discourse/vendor/* ~/apps/discourse/htdocs/vendor
 
 cd ~/apps/discourse/htdocs
 sudo RUBY_GC_MALLOC_LIMIT=90000000 RAILS_ENV=production bundle exec rake tmp:clear
