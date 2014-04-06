@@ -1266,6 +1266,11 @@ uk:
     tracked_categories: "Відстежувані категорії"
     tracked_categories_instructions: "Додайте сюди категорії, які бажаєте відстежувати."
     trust_level: "Рівень довіри"
+    create_account:
+      title: 'Створити аккаунт'
+      action: 'Зареєструватися!'
+      invite: 'Ви ще не зареєстровані?'
+      failed: 'Помилка. Мабуть цей Email увже використовується. Спробуйте відновити пароль.'
     unmute: Увімкнути
     watched_categories: "Відслідковувані"
     watched_categories_instructions: "You will automatically watch all new topics in these categories. You will be notified of all new posts and topics, plus the count of unread and new posts will also appear next to the topic's listing."
