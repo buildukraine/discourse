@@ -702,6 +702,7 @@ uk:
     links: Посилання
     loading: Завантаження
     log_in: Увійти
+    create_account: Зареєструватися
     login: 
       authenticating: Перевірка...
       awaiting_approval: "Ваш обліковий запис ще не схвалено. Ви отримаєте лист, коли це станеться."

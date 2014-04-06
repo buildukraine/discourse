@@ -92,6 +92,7 @@ en:
     generic_error: "Sorry, an error has occurred."
     generic_error_with_reason: "An error occurred: %{error}"
     log_in: "Log In"
+    create_account: "Create Account"
     age: "Age"
     last_post: "Last Post"
     joined: "Joined"

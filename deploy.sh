@@ -3,6 +3,7 @@ sudo cp -f -R ~/discourse/config/locales/client.uk.yml ~/apps/discourse/htdocs/c
 sudo cp -f -R ~/discourse/config/locales/server.uk.yml ~/apps/discourse/htdocs/config/locales/server.uk.yml
 sudo cp -f -R ~/discourse/app/assets/javascripts/discourse/models/* ~/apps/discourse/htdocs/app/assets/javascripts/discourse/models
 sudo cp -f -R ~/discourse/app/assets/stylesheets/* ~/apps/discourse/htdocs/app/assets/stylesheets
+sudo cp -f -R ~/discourse/app/assets/javascripts/* ~/apps/discourse/htdocs/app/assets/javascripts
 sudo cp -f -R ~/discourse/app/views/layouts/* ~/apps/discourse/htdocs/app/views/layouts
 
 cd ~/apps/discourse/htdocs
