@@ -912,7 +912,7 @@ uk:
           vote: "Відкликати голос"
       archetypes: 
         save: "Параметри збереження"
-      continue_discussion: "Продовжити обговорення з {{postLink}}:"
+      continue_discussion: "Продовження обговорення {{postLink}}:"
       controls: 
         delete: "видалити повідомлення"
         delete_replies: 
