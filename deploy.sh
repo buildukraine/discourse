@@ -8,6 +8,8 @@ sudo cp -f -R ~/discourse/lib/* ~/apps/discourse/htdocs/lib
 sudo cp -f -R ~/discourse/spec/* ~/apps/discourse/htdocs/spec
 sudo cp -f -R ~/discourse/vendor/* ~/apps/discourse/htdocs/vendor
 
+sudo cp -f -R ~/discourse/db/* ~/apps/discourse/htdocs/db
+
 cd ~/apps/discourse/htdocs
 sudo RUBY_GC_MALLOC_LIMIT=90000000 RAILS_ENV=production bundle exec rake tmp:clear
 sudo RUBY_GC_MALLOC_LIMIT=90000000 RAILS_ENV=production bundle exec rake assets:precompile
