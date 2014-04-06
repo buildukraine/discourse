@@ -1,5 +1,8 @@
 cd ~/discourse
 
+sudo cp -f -R ~/discourse/config/locales/client.uk.yml ~/apps/discourse/htdocs/config/locales/client.uk.yml
+sudo cp -f -R ~/discourse/config/locales/server.uk.yml ~/apps/discourse/htdocs/config/locales/server.uk.yml
+
 sudo cp -f -R ~/discourse/app/* ~/apps/discourse/htdocs/app
 sudo cp -f -R ~/discourse/lib/* ~/apps/discourse/htdocs/lib
 sudo cp -f -R ~/discourse/spec/* ~/apps/discourse/htdocs/spec
